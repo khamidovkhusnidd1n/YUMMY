@@ -2,11 +2,14 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeybo
 
 def admin_profile_kb(is_super=False):
     kb = []
+    kb.append([InlineKeyboardButton(text="Dashboard", callback_data="admin_dashboard")])
+    kb.append([InlineKeyboardButton(text="Buyurtmalar", callback_data="admin_orders")])
     if is_super:
         kb.append([InlineKeyboardButton(text="📊 Statistika", callback_data="admin_stats")])
         kb.append([InlineKeyboardButton(text="📈 Analitika", callback_data="admin_analytics")])
         kb.append([InlineKeyboardButton(text="🍴 Menu Boshqaruvi", callback_data="admin_menu_manage")])
         kb.append([InlineKeyboardButton(text="📑 Excel Hisobot", callback_data="admin_report")])
+        kb.append([InlineKeyboardButton(text="Adminlar", callback_data="admin_admins")])
     else:
         kb.append([InlineKeyboardButton(text="📦 Buyurtmalar (Worker)", callback_data="worker_info")])
     

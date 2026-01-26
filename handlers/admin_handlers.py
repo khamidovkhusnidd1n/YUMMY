@@ -2,11 +2,111 @@ from aiogram import Router, F, types
 from aiogram.filters import Command
 from database import db
 from keyboards.admin_keyboards import order_initial_kb, order_next_stage_kb
-from config import SUPER_ADMINS, ALL_ADMINS
+from config import SUPER_ADMINS, ALL_ADMINS, WORKERS
 from translations import STRINGS
 import os
 
 router = Router()
+
+STATUS_LABELS = [
+    ("pending", "Kutilmoqda"),
+    ("accepted", "Qabul qilingan"),
+    ("preparing", "Tayyorlanmoqda"),
+    ("delivering", "Yetkazilmoqda"),
+    ("completed", "Yakunlangan"),
+    ("rejected", "Rad etilgan"),
+]
+STATUS_LABEL_MAP = {key: label for key, label in STATUS_LABELS}
+
+
+def _get_order_status_counts():
+    rows = db.cursor.execute("SELECT status, COUNT(*) FROM orders GROUP BY status").fetchall()
+    return {status: count for status, count in rows}
+
+
+def _format_datetime(value):
+    if not value:
+        return "N/A"
+    text = str(value)
+    return text[:19] if len(text) > 19 else text
+
+
+def build_admin_dashboard_text(user_id):
+    d_orders, d_rev = db.get_daily_stats()
+    t_orders, t_rev = db.get_stats()
+    counts = _get_order_status_counts()
+    active_count = sum(counts.get(key, 0) for key, _ in STATUS_LABELS[:4])
+    total_admins = len(set(ALL_ADMINS))
+    super_count = len(set(SUPER_ADMINS))
+    worker_count = len(set(WORKERS))
+    role = "Super admin" if user_id in SUPER_ADMINS else "Admin"
+
+    text = "*Admin Dashboard*\n"
+    text += f"Rol: {role}\n"
+    text += f"Adminlar: jami {total_admins} (Super: {super_count}, Worker: {worker_count})\n\n"
+    text += "Bugun:\n"
+    text += f"- Buyurtmalar: {d_orders}\n"
+    text += f"- Tushum: {d_rev:,} so'm\n\n"
+    text += "Umumiy:\n"
+    text += f"- Buyurtmalar: {t_orders}\n"
+    text += f"- Tushum: {t_rev:,} so'm\n\n"
+    text += f"Faol buyurtmalar: {active_count}\n"
+    text += "Holat bo'yicha:\n"
+    for status, label in STATUS_LABELS:
+        text += f"- {label}: {counts.get(status, 0)}\n"
+
+    return text
+
+
+@router.callback_query(F.data == "admin_dashboard", F.from_user.id.in_(ALL_ADMINS))
+async def admin_dashboard_callback(callback: types.CallbackQuery):
+    text = build_admin_dashboard_text(callback.from_user.id)
+    await callback.message.answer(text, parse_mode="Markdown")
+    await callback.answer()
+
+
+@router.callback_query(F.data == "admin_orders", F.from_user.id.in_(ALL_ADMINS))
+async def admin_orders_callback(callback: types.CallbackQuery):
+    counts = _get_order_status_counts()
+    active_count = sum(counts.get(key, 0) for key, _ in STATUS_LABELS[:4])
+    rows = db.cursor.execute(
+        "SELECT order_id, total_price, status, created_at FROM orders ORDER BY created_at DESC LIMIT ?",
+        (10,),
+    ).fetchall()
+
+    text = "*Buyurtmalar monitoringi*\n\n"
+    text += f"Faol: {active_count}\n"
+    text += f"Yakunlangan: {counts.get('completed', 0)}\n"
+    text += f"Rad etilgan: {counts.get('rejected', 0)}\n\n"
+    text += "Oxirgi 10 ta buyurtma:\n"
+
+    if rows:
+        for order_id, total_price, status, created_at in rows:
+            status_label = STATUS_LABEL_MAP.get(status, status)
+            date_str = _format_datetime(created_at)
+            text += f"- ID {order_id} | {total_price:,} so'm | {status_label} | {date_str}\n"
+    else:
+        text += "Hozircha buyurtma yo'q.\n"
+
+    await callback.message.answer(text, parse_mode="Markdown")
+    await callback.answer()
+
+
+@router.callback_query(F.data == "admin_admins", F.from_user.id.in_(SUPER_ADMINS))
+async def admin_admins_callback(callback: types.CallbackQuery):
+    total_admins = len(set(ALL_ADMINS))
+    super_count = len(set(SUPER_ADMINS))
+    worker_count = len(set(WORKERS))
+
+    text = "*Adminlar*\n\n"
+    text += f"Jami: {total_admins}\n"
+    text += f"Super adminlar: {super_count}\n"
+    text += f"Workerlar: {worker_count}\n\n"
+    text += "Adminlarni o'zgartirish uchun .env faylida SUPER_ADMINS va WORKERS ni yangilang."
+
+    await callback.message.answer(text, parse_mode="Markdown")
+    await callback.answer()
+
 
 @router.message(Command("stats"), F.from_user.id.in_(SUPER_ADMINS))
 @router.callback_query(F.data == "admin_stats", F.from_user.id.in_(SUPER_ADMINS))

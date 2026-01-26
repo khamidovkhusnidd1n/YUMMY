@@ -5,6 +5,7 @@ from aiogram.fsm.state import State, StatesGroup
 from keyboards import user_keyboards as kb
 from database import db
 from config import WORKERS, SUPER_ADMINS
+from handlers.admin_handlers import build_admin_dashboard_text
 from translations import STRINGS
 STR_UZ = STRINGS['uz']
 STR_RU = STRINGS['ru']
@@ -44,10 +45,12 @@ async def show_admin_menu(message: types.Message):
     user_id = message.from_user.id
     if user_id in (SUPER_ADMINS + WORKERS):
         is_super = user_id in SUPER_ADMINS
-        # Update the reply keyboard first to clean up the UI
-        await message.answer("🏠 Siz hozir Admin menyusidasiz.", reply_markup=akb.admin_reply_menu())
-        # Then send the actual dashboard
-        await message.answer("⚒ Boshqaruv elementlari:", reply_markup=akb.admin_profile_kb(is_super=is_super))
+        await message.answer("Admin paneli faollashtirildi.", reply_markup=akb.admin_reply_menu())
+        await message.answer(
+            build_admin_dashboard_text(user_id),
+            reply_markup=akb.admin_profile_kb(is_super=is_super),
+            parse_mode="Markdown",
+        )
 
 @router.message(F.text == "🏠 Foydalanuvchi menyusi")
 async def back_to_user_menu(message: types.Message):
