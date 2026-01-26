@@ -1,0 +1,6 @@
+aiogram
+pandas
+openpyxl
+sqlite3
+python-dotenv
+aiohttp
