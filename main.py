@@ -32,6 +32,15 @@ def main():
     dp.include_router(user_handlers.router)
     dp.include_router(admin_handlers.router)
 
+    # Initialize admins from config
+    from config import SUPER_ADMINS, WORKERS
+    from database import db
+    for admin_id in SUPER_ADMINS:
+        db.add_admin(admin_id, role='super_admin')
+    for worker_id in WORKERS:
+        if not db.get_admin(worker_id):
+            db.add_admin(worker_id, role='admin', permissions='orders')
+
     # If RENDER_EXTERNAL_URL is set, use webhooks
     if WEBHOOK_HOST:
         dp.startup.register(on_startup)

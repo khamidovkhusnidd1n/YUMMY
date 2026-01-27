@@ -44,8 +44,9 @@ from keyboards import admin_keyboards as akb
 @router.message(F.text == "🛠 Admin Panel")
 async def show_admin_menu(message: types.Message):
     user_id = message.from_user.id
-    if user_id in (SUPER_ADMINS + WORKERS):
-        is_super = user_id in SUPER_ADMINS
+    admin = db.get_admin(user_id)
+    if admin:
+        is_super = admin[1] == 'super_admin'
         await message.answer(
             "Siz hozir Admin menyusidasiz.\n\nBoshqaruv tugmalari pastda paydo bo'ldi.", 
             reply_markup=akb.admin_reply_menu(is_super)

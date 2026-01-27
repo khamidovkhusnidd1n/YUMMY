@@ -10,15 +10,16 @@ from keyboards.admin_keyboards import (
     promo_manage_kb, mailing_kb, cancel_kb, category_list_kb, product_list_kb,
     admin_profile_kb, menu_manage_reply_kb
 )
+import keyboards.admin_keyboards as akb
 from config import SUPER_ADMINS, ALL_ADMINS, WORKERS
 from translations import STRINGS
 import os
 
 class AdminStates(StatesGroup):
     # Product States
-    adding_product_name = State()
-    adding_product_price = State()
-    adding_product_image = State()
+    adding_product_name = State()   # First after category
+    adding_product_price = State()  # Second
+    adding_product_image = State()  # Third (last)
     
     editing_price_value = State()
     
@@ -29,6 +30,9 @@ class AdminStates(StatesGroup):
     # Mailing States
     mailing_content = State()
     mailing_preview = State()
+    
+    # Admin Management States
+    adding_admin_id = State()
 
 router = Router()
 
@@ -60,13 +64,17 @@ def build_admin_dashboard_text(user_id):
     t_orders, t_rev = db.get_stats()
     counts = _get_order_status_counts()
     active_count = sum(counts.get(key, 0) for key, _ in STATUS_LABELS[:4])
-    total_admins = len(set(ALL_ADMINS))
-    super_count = len(set(SUPER_ADMINS))
-    worker_count = len(set(WORKERS))
-    role = "Super admin" if user_id in SUPER_ADMINS else "Admin"
+    
+    admins = db.get_all_admins()
+    total_admins = len(admins)
+    super_count = len([a for a in admins if a[1] == 'super_admin'])
+    worker_count = total_admins - super_count
+    
+    admin_data = db.get_admin(user_id)
+    role_label = "Super admin" if admin_data and admin_data[1] == 'super_admin' else "Admin"
 
     text = "*Admin Dashboard*\n"
-    text += f"Rol: {role}\n"
+    text += f"Rol: {role_label}\n"
     text += f"Adminlar: jami {total_admins} (Super: {super_count}, Worker: {worker_count})\n\n"
     text += "Bugun:\n"
     text += f"- Buyurtmalar: {d_orders}\n"
@@ -82,18 +90,23 @@ def build_admin_dashboard_text(user_id):
     return text
 
 
-@router.callback_query(F.data == "admin_dashboard", F.from_user.id.in_(ALL_ADMINS))
-@router.callback_query(F.data == "admin_dashboard_home", F.from_user.id.in_(ALL_ADMINS))
+@router.callback_query(F.data.in_(["admin_dashboard", "admin_dashboard_home"]))
 async def admin_dashboard_callback(callback: types.CallbackQuery):
     user_id = callback.from_user.id
-    is_super = user_id in SUPER_ADMINS
+    admin = db.get_admin(user_id)
+    if not admin:
+        return await callback.answer("Sizda admin huquqi yo'q.", show_alert=True)
+        
+    is_super = admin[1] == 'super_admin'
     text = build_admin_dashboard_text(user_id)
     await callback.message.edit_text(text, reply_markup=admin_profile_kb(is_super), parse_mode="Markdown")
     await callback.answer()
 
 
-@router.callback_query(F.data == "admin_orders", F.from_user.id.in_(ALL_ADMINS))
+@router.callback_query(F.data == "admin_orders")
 async def admin_orders_callback(callback: types.CallbackQuery):
+    if not db.has_permission(callback.from_user.id, 'orders'):
+        return await callback.answer("Sizda buyurtmalarni ko'rish huquqi yo'q.", show_alert=True)
     counts = _get_order_status_counts()
     active_count = sum(counts.get(key, 0) for key, _ in STATUS_LABELS[:4])
     rows = db.cursor.execute(
@@ -135,9 +148,13 @@ async def admin_admins_callback(callback: types.CallbackQuery):
     await callback.answer()
 
 
-@router.message(Command("stats"), F.from_user.id.in_(SUPER_ADMINS))
-@router.callback_query(F.data == "admin_stats", F.from_user.id.in_(SUPER_ADMINS))
+@router.message(Command("stats"))
+@router.callback_query(F.data == "admin_stats")
 async def show_stats_callback(event: types.Message | types.CallbackQuery):
+    if not db.has_permission(event.from_user.id, 'stats'):
+        if isinstance(event, types.CallbackQuery):
+            await event.answer("Sizda statistikani ko'rish huquqi yo'q.", show_alert=True)
+        return
     message = event if isinstance(event, types.Message) else event.message
     lang = db.get_user_lang(event.from_user.id)
     s = STRINGS[lang]
@@ -154,8 +171,12 @@ async def show_stats_callback(event: types.Message | types.CallbackQuery):
     else:
         await message.answer(text, parse_mode="Markdown")
 
-@router.callback_query(F.data == "admin_analytics", F.from_user.id.in_(SUPER_ADMINS))
+@router.callback_query(F.data == "admin_analytics")
 async def show_analytics_callback(event: types.CallbackQuery | types.Message):
+    if not db.has_permission(event.from_user.id, 'stats'):
+        if isinstance(event, types.CallbackQuery):
+            await event.answer("Sizda analitikani ko'rish huquqi yo'q.", show_alert=True)
+        return
     message = event if isinstance(event, types.Message) else event.message
     top_products = db.get_top_products()
     top_customers = db.get_top_customers()
@@ -181,94 +202,224 @@ async def show_analytics_callback(event: types.CallbackQuery | types.Message):
     if isinstance(event, types.CallbackQuery):
         await event.answer()
 
-@router.callback_query(F.data == "admin_menu_manage", F.from_user.id.in_(SUPER_ADMINS))
+@router.callback_query(F.data == "admin_menu_manage")
 async def admin_menu_manage_callback(callback: types.CallbackQuery):
+    if not db.has_permission(callback.from_user.id, 'menu'):
+        return await callback.answer("Sizda menuni boshqarish huquqi yo'q.", show_alert=True)
     await callback.message.edit_text("🍴 **Menu Boshqaruvi**\n\nBu yerdan taomlar qo'shishingiz, narxlarni o'zgartirishingiz yoki taomlarni o'chirishingiz mumkin.", reply_markup=menu_manage_kb())
     await callback.message.answer("Menu boshqaruvi tugmalari pastga qo'shildi.", reply_markup=menu_manage_reply_kb())
     await callback.answer()
 
-@router.callback_query(F.data == "admin_promo_manage", F.from_user.id.in_(SUPER_ADMINS))
-@router.message(F.text == "🎟 Promolar", F.from_user.id.in_(SUPER_ADMINS))
+@router.callback_query(F.data == "admin_promo_manage")
+@router.message(F.text == "🎟 Promolar")
 async def admin_promo_manage_callback(event: types.CallbackQuery | types.Message):
+    if not db.has_permission(event.from_user.id, 'promos'):
+        if isinstance(event, types.CallbackQuery):
+            await event.answer("Sizda promolarni boshqarish huquqi yo'q.", show_alert=True)
+        return
     if isinstance(event, types.CallbackQuery):
         await event.message.edit_text("🎟 **Promo Kodlar Boshqaruvi**", reply_markup=promo_manage_kb())
         await event.answer()
     else:
         await event.answer("🎟 **Promo Kodlar Boshqaruvi**", reply_markup=promo_manage_kb())
 
-@router.callback_query(F.data == "admin_mailing", F.from_user.id.in_(SUPER_ADMINS))
-@router.message(F.text == "📢 Mailing", F.from_user.id.in_(SUPER_ADMINS))
+@router.callback_query(F.data == "admin_mailing")
+@router.message(F.text == "📢 Mailing")
 async def admin_mailing_callback(callback_event: types.CallbackQuery | types.Message):
+    if not db.has_permission(callback_event.from_user.id, 'mailing'):
+        if isinstance(callback_event, types.CallbackQuery):
+            await callback_event.answer("Sizda xabar yuborish huquqi yo'q.", show_alert=True)
+        return
     if isinstance(callback_event, types.CallbackQuery):
         await callback_event.message.edit_text("📢 **Mailing (Xabar yuborish)**", reply_markup=mailing_kb())
         await callback_event.answer()
     else:
         await callback_event.answer("📢 **Mailing (Xabar yuborish)**", reply_markup=mailing_kb())
 
-# --- Text-based shortcuts for admin reply keyboard buttons ---
-
-@router.message(F.text == "📊 Statistika", F.from_user.id.in_(SUPER_ADMINS))
+@router.message(F.text == "📉 Statistika")
 async def admin_stats_msg(message: types.Message):
     await show_stats_callback(message)
 
-@router.message(F.text == "📈 Analitika", F.from_user.id.in_(SUPER_ADMINS))
-async def admin_analytics_msg(message: types.Message):
-    await show_analytics_callback(FakeCallback(message))
+@router.message(F.text == "📊 Dashboard")
+async def admin_dashboard_msg(message: types.Message):
+    admin = db.get_admin(message.from_user.id)
+    if not admin: return
+    
+    is_super = admin[1] == 'super_admin'
+    text = build_admin_dashboard_text(message.from_user.id)
+    await message.answer(text, reply_markup=akb.admin_reply_menu(is_super), parse_mode="Markdown")
 
-@router.message(F.text == "📄 Excel Hisobot", F.from_user.id.in_(SUPER_ADMINS))
+@router.message(F.text == "📑 Hisobot (Excel)")
 async def admin_report_msg(message: types.Message):
+    if not db.has_permission(message.from_user.id, 'stats'):
+        return await message.answer("Sizda hisobotlarni ko'rish huquqi yo'q.")
     await get_report_callback(message)
 
-@router.message(F.text == "🛍 Buyurtmalar", F.from_user.id.in_(ALL_ADMINS))
+@router.message(F.text == "👥 Adminlar Boshqaruvi")
+async def admin_admins_msg(message: types.Message):
+    if not db.has_permission(message.from_user.id, 'manage_admins'):
+        return await message.answer("Sizda bu bo'limga kirish huquqi yo'q.")
+    await message.answer("👥 **Adminlar Boshqaruvi**", reply_markup=akb.admin_management_kb())
+
+@router.callback_query(F.data == "am_home")
+async def am_home(callback: types.CallbackQuery):
+    await callback.message.edit_text("👥 **Adminlar Boshqaruvi**", reply_markup=akb.admin_management_kb())
+    await callback.answer()
+
+@router.callback_query(F.data == "am_list")
+async def am_list(callback: types.CallbackQuery):
+    admins = db.get_all_admins()
+    await callback.message.edit_text("📜 **Mavjud adminlar ro'yxati:**", reply_markup=akb.admin_list_kb(admins))
+    await callback.answer()
+
+@router.callback_query(F.data == "am_add")
+async def am_add_start(callback: types.CallbackQuery, state: FSMContext):
+    await callback.message.edit_text("➕ Yangi admin qo'shish uchun uning **Telegram ID** raqamini yozing:", reply_markup=akb.cancel_kb())
+    await state.set_state(AdminStates.adding_admin_id)
+    await callback.answer()
+
+@router.message(AdminStates.adding_admin_id)
+async def am_save_new(message: types.Message, state: FSMContext):
+    if not message.text.isdigit():
+        return await message.answer("Iltimos, faqat raqamlardan iborat ID ni kiriting!")
+    
+    target_id = int(message.text)
+    db.add_admin(target_id, role='admin', permissions='orders')
+    await message.answer(f"✅ Admin qo'shildi (ID: {target_id}). Endi uning huquqlarini sozlashingiz mumkin.", reply_markup=akb.admin_view_kb(target_id, 'admin'))
+    await state.clear()
+
+@router.callback_query(F.data.startswith("am_view_"))
+async def am_view(callback: types.CallbackQuery):
+    target_id = int(callback.data.split("_")[2])
+    admin = db.get_admin(target_id)
+    if not admin:
+        return await callback.answer("Admin topilmadi.", show_alert=True)
+    
+    text = f"👤 **Admin Ma'lumotlari**\n\n🆔 ID: {admin[0]}\n🎭 Rol: {admin[1]}\n🔐 Huquqlar: {admin[2] if admin[2] else 'Yo\'q'}"
+    await callback.message.edit_text(text, reply_markup=akb.admin_view_kb(target_id, admin[1]))
+    await callback.answer()
+
+@router.callback_query(F.data.startswith("am_edit_role_"))
+async def am_edit_role(callback: types.CallbackQuery):
+    target_id = int(callback.data.split("_")[3])
+    await callback.message.edit_text("🎭 Yangi rolni tanlang:", reply_markup=akb.admin_role_kb(target_id))
+    await callback.answer()
+
+@router.callback_query(F.data.startswith("am_setrole_"))
+async def am_set_role(callback: types.CallbackQuery):
+    parts = callback.data.split("_")
+    target_id = int(parts[2])
+    new_role = parts[3] + "_" + parts[4] if len(parts) > 4 else parts[3]
+    
+    db.update_admin_role(target_id, new_role)
+    await callback.answer(f"Rol '{new_role}' qilib belgilandi.", show_alert=True)
+    await am_view(callback)
+
+@router.callback_query(F.data.startswith("am_edit_perms_"))
+async def am_edit_perms(callback: types.CallbackQuery):
+    target_id = int(callback.data.split("_")[3])
+    admin = db.get_admin(target_id)
+    await callback.message.edit_text("🔐 Admin huquqlarini belgilang:", reply_markup=akb.admin_permissions_kb(target_id, admin[2]))
+    await callback.answer()
+
+@router.callback_query(F.data.startswith("am_togperm_"))
+async def am_toggle_perm(callback: types.CallbackQuery):
+    parts = callback.data.split("_")
+    target_id = int(parts[2])
+    perm = parts[3]
+    
+    admin = db.get_admin(target_id)
+    current_list = admin[2].split(',') if admin[2] else []
+    
+    if perm in current_list:
+        current_list.remove(perm)
+    else:
+        current_list.append(perm)
+    
+    new_perms = ",".join([p for p in current_list if p])
+    db.update_admin_permissions(target_id, new_perms)
+    await callback.message.edit_reply_markup(reply_markup=akb.admin_permissions_kb(target_id, new_perms))
+    await callback.answer()
+
+@router.callback_query(F.data.startswith("am_del_"))
+async def am_delete(callback: types.CallbackQuery):
+    target_id = int(callback.data.split("_")[2])
+    db.remove_admin(target_id)
+    await callback.answer("Admin muvaffaqiyatli o'chirildi. Endi u admin panelga kira olmaydi.", show_alert=True)
+    await am_list(callback)
+
+@router.message(F.text == "🛍 Buyurtmalar")
 async def admin_orders_msg(message: types.Message):
+    if not db.has_permission(message.from_user.id, 'orders'):
+        return await message.answer("Sizda buyurtmalarni ko'rish huquqi yo'q.")
     class FakeCallback:
         def __init__(self, msg): self.message = msg; self.from_user = msg.from_user
         async def answer(self): pass
     await admin_orders_callback(FakeCallback(message))
 
-@router.message(F.text == "🍴 Menu Boshqaruvi", F.from_user.id.in_(SUPER_ADMINS))
+@router.message(F.text == "🍽 Menu Boshqaruvi")
 async def admin_menu_manage_msg(message: types.Message):
-    await message.answer("🍴 **Menu Boshqaruvi**\n\nBu yerdan taomlar qo'shishingiz, narxlarni o'zgartirishingiz yoki taomlarni o'chirishingiz mumkin.", reply_markup=menu_manage_kb())
+    if not db.has_permission(message.from_user.id, 'menu'):
+        return await message.answer("Sizda menuni boshqarish huquqi yo'q.")
+    await message.answer("🍽 **Menu Boshqaruvi**\n\nBu yerdan taomlar qo'shishingiz, narxlarni o'zgartirishingiz yoki taomlarni o'chirishingiz mumkin.", reply_markup=menu_manage_kb())
     await message.answer("Menu boshqaruvi tugmalari pastga qo'shildi.", reply_markup=menu_manage_reply_kb())
 
-@router.message(F.text == "➕ Yangi taom qo'shish", F.from_user.id.in_(SUPER_ADMINS))
-async def admin_add_prod_text(message: types.Message):
-    await admin_add_prod_start(message)
+@router.message(F.text == "➕ Yangi taom qo'shish")
+@router.message(F.text == "✏️ Narxlarni tahrirlash")
+@router.message(F.text == "🗑 Taomni o'chirish")
+async def admin_menu_text_access(message: types.Message):
+    if not db.has_permission(message.from_user.id, 'menu'):
+        return await message.answer("Sizda bu bo'limga ruxsat yo'q.")
+    
+    text = message.text
+    cats = db.get_all_categories()
+    if "Yangi taom" in text:
+        await message.answer("Kategoriyani tanlang:", reply_markup=category_list_kb(cats))
+    elif "Narxlarni" in text:
+        await message.answer("Kategoriyani tanlang (narxni o'zgartirish uchun):", reply_markup=category_list_kb(cats))
+    elif "Taomni o'chirish" in text:
+        await message.answer("Kategoriyani tanlang (o'chirish uchun):", reply_markup=category_list_kb(cats))
 
-@router.message(F.text == "✏️ Narxlarni tahrirlash", F.from_user.id.in_(SUPER_ADMINS))
-async def admin_edit_price_text(message: types.Message):
-    await admin_edit_price_start(message)
-
-@router.message(F.text == "🗑 Taomni o'chirish", F.from_user.id.in_(SUPER_ADMINS))
-async def admin_del_prod_text(message: types.Message):
-    await admin_del_prod_start(message)
-
-@router.message(F.text == "🔙 Asosiy panel", F.from_user.id.in_(ALL_ADMINS))
+@router.message(F.text == "🔙 Asosiy panel")
 async def admin_back_home_msg(message: types.Message):
-    user_id = message.from_user.id
-    is_super = user_id in SUPER_ADMINS
+    admin = db.get_admin(message.from_user.id)
+    if not admin: return
+    
+    is_super = admin[1] == 'super_admin'
     from keyboards.admin_keyboards import admin_reply_menu
     await message.answer("Asosiy panelga qaytdingiz.", reply_markup=admin_reply_menu(is_super))
     await admin_dashboard_msg(message)
 
 # --- Product Management Handlers ---
 
-@router.callback_query(F.data == "admin_add_prod", F.from_user.id.in_(SUPER_ADMINS))
+@router.callback_query(F.data == "admin_add_prod")
 async def admin_add_prod_start(callback: types.CallbackQuery):
+    if not db.has_permission(callback.from_user.id, 'menu'):
+        return await callback.answer("Ruxsat yo'q.", show_alert=True)
     cats = db.get_all_categories()
     await callback.message.edit_text("Kategoriyani tanlang:", reply_markup=category_list_kb(cats))
     await callback.answer()
 
-@router.callback_query(F.data == "admin_edit_price", F.from_user.id.in_(SUPER_ADMINS))
+@router.callback_query(F.data == "admin_edit_price")
 async def admin_edit_price_start(callback: types.CallbackQuery):
+    if not db.has_permission(callback.from_user.id, 'menu'):
+        return await callback.answer("Ruxsat yo'q.", show_alert=True)
     cats = db.get_all_categories()
     await callback.message.edit_text("Kategoriyani tanlang (narxni o'zgartirish uchun):", reply_markup=category_list_kb(cats))
+    await callback.answer()
+
+@router.callback_query(F.data == "admin_del_prod")
+async def admin_del_prod_start(callback: types.CallbackQuery):
+    if not db.has_permission(callback.from_user.id, 'menu'):
+        return await callback.answer("Ruxsat yo'q.", show_alert=True)
+    cats = db.get_all_categories()
+    await callback.message.edit_text("Kategoriyani tanlang (o'chirish uchun):", reply_markup=category_list_kb(cats))
     await callback.answer()
 
 @router.message(AdminStates.adding_product_name)
 async def admin_add_prod_name(message: types.Message, state: FSMContext):
     await state.update_data(name=message.text)
-    await message.answer("Taom narxini kiriting (faqat raqamda):", reply_markup=cancel_kb())
+    await message.answer("💰 Taom narxini kiriting (faqat raqamda):", reply_markup=cancel_kb())
     await state.set_state(AdminStates.adding_product_price)
 
 @router.message(AdminStates.adding_product_price)
@@ -276,33 +427,59 @@ async def admin_add_prod_price(message: types.Message, state: FSMContext):
     if not message.text.isdigit():
         return await message.answer("Iltimos, faqat raqam kiriting!")
     await state.update_data(price=int(message.text))
-    await message.answer("Taom rasmini yuboring (yoki Unsplash/local path matnini):", reply_markup=cancel_kb())
+    await message.answer("📷 Taom rasmini yuboring:", reply_markup=cancel_kb())
     await state.set_state(AdminStates.adding_product_image)
 
 @router.message(AdminStates.adding_product_image)
 async def admin_add_prod_image(message: types.Message, state: FSMContext):
-    data = await state.get_data()
-    image = message.text if message.text else "images/burger.png" # Default if not text
-    if message.photo:
-        # For simplicity, we'll ask for a path, but normally we'd save the image
-        # Here we'll just use a placeholder or the file_id if we wanted to support it robustly
-        image = "images/burger.png" # Minimal implementation
+    import os
+    import uuid
     
-    db.add_product(data['cat_id'], data['name'], data['price'], image)
-    await message.answer(f"✅ Taom qo'shildi: {data['name']}", reply_markup=admin_profile_kb(True))
+    data = await state.get_data()
+    
+    if message.photo:
+        # Save the photo to images folder
+        photo = message.photo[-1]  # Get highest resolution
+        file_id = photo.file_id
+        file = await message.bot.get_file(file_id)
+        file_path = file.file_path
+        
+        # Generate unique filename
+        ext = file_path.split('.')[-1] if '.' in file_path else 'jpg'
+        new_filename = f"product_{uuid.uuid4().hex[:8]}.{ext}"
+        save_path = f"frontend/images/products/{new_filename}"
+        
+        # Create directory if not exists
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        
+        # Download and save
+        await message.bot.download_file(file_path, save_path)
+        image_path = f"images/products/{new_filename}"
+    elif message.text:
+        image_path = message.text
+    else:
+        return await message.answer("Iltimos, rasm yuboring!")
+    
+    # Add product to database
+    db.add_product(data['cat_id'], data['name'], data['price'], image_path)
+    await message.answer(f"✅ Taom qo'shildi!\n\n📝 Nom: {data['name']}\n💰 Narx: {data['price']:,} so'm", reply_markup=admin_profile_kb(True))
     await state.clear()
 
 # --- Cancel Handler ---
 @router.callback_query(F.data == "admin_cancel")
 async def admin_cancel(callback: types.CallbackQuery, state: FSMContext):
     await state.clear()
-    await callback.message.edit_text("Amal bekor qilindi.", reply_markup=admin_profile_kb(True))
+    admin = db.get_admin(callback.from_user.id)
+    is_super = admin[1] == 'super_admin' if admin else False
+    await callback.message.edit_text("Amal bekor qilindi.", reply_markup=admin_profile_kb(is_super))
     await callback.answer()
 
 # --- Product Edit Handler ---
 # Reuse admin_cat_selected but with a state check for edit/delete
-@router.callback_query(F.data.startswith("admin_cat_"), F.from_user.id.in_(SUPER_ADMINS))
+@router.callback_query(F.data.startswith("admin_cat_"))
 async def admin_cat_selected_for_action(callback: types.CallbackQuery, state: FSMContext):
+    if not db.has_permission(callback.from_user.id, 'menu'):
+        return await callback.answer("Ruxsat yo'q.", show_alert=True)
     cat_id = int(callback.data.split("_")[2])
     text = callback.message.text
     
@@ -312,14 +489,16 @@ async def admin_cat_selected_for_action(callback: types.CallbackQuery, state: FS
     elif "o'chirish" in text:
         await callback.message.edit_text("O'chirish uchun taomni tanlang:", reply_markup=product_list_kb(products, "admin_del_sel_"))
     else:
-        # Addition flow (default)
+        # Addition flow: Category selected, ask for NAME
         await state.update_data(cat_id=cat_id)
-        await callback.message.answer("Taom nomini kiriting:", reply_markup=cancel_kb())
+        await callback.message.answer("📝 Taom nomini kiriting:", reply_markup=cancel_kb())
         await state.set_state(AdminStates.adding_product_name)
     await callback.answer()
 
-@router.callback_query(F.data.startswith("admin_edit_sel_"), F.from_user.id.in_(SUPER_ADMINS))
+@router.callback_query(F.data.startswith("admin_edit_sel_"))
 async def admin_edit_price_selected(callback: types.CallbackQuery, state: FSMContext):
+    if not db.has_permission(callback.from_user.id, 'menu'):
+        return await callback.answer("Ruxsat yo'q.", show_alert=True)
     prod_id = int(callback.data.split("_")[3])
     await state.update_data(prod_id=prod_id)
     await callback.message.answer("Yangi narxni kiriting (faqat raqam):", reply_markup=cancel_kb())
@@ -335,8 +514,10 @@ async def admin_edit_price_save(message: types.Message, state: FSMContext):
     await message.answer(f"✅ Narx o'zgartirildi: {message.text} so'm", reply_markup=admin_profile_kb(True))
     await state.clear()
 
-@router.callback_query(F.data.startswith("admin_del_sel_"), F.from_user.id.in_(SUPER_ADMINS))
+@router.callback_query(F.data.startswith("admin_del_sel_"))
 async def admin_del_prod_selected(callback: types.CallbackQuery):
+    if not db.has_permission(callback.from_user.id, 'menu'):
+        return await callback.answer("Ruxsat yo'q.", show_alert=True)
     prod_id = int(callback.data.split("_")[3])
     db.delete_product(prod_id)
     await callback.message.answer("✅ Taom o'chirildi.")
@@ -352,8 +533,10 @@ async def admin_del_prod_start(callback: types.CallbackQuery):
     await callback.answer()
 
 # --- Promo Code Handlers ---
-@router.callback_query(F.data == "admin_add_promo", F.from_user.id.in_(SUPER_ADMINS))
+@router.callback_query(F.data == "admin_add_promo")
 async def admin_add_promo_start(callback: types.CallbackQuery, state: FSMContext):
+    if not db.has_permission(callback.from_user.id, 'promos'):
+        return await callback.answer("Ruxsat yo'q.", show_alert=True)
     await callback.message.answer("Yangi promo kodni kiriting (masalan: YUMMY2024):", reply_markup=cancel_kb())
     await state.set_state(AdminStates.adding_promo_code)
     await callback.answer()
@@ -373,8 +556,10 @@ async def admin_add_promo_discount(message: types.Message, state: FSMContext):
     await message.answer(f"✅ Promo kod qo'shildi: {data['code']} ({message.text}%)", reply_markup=admin_profile_kb(True))
     await state.clear()
 
-@router.callback_query(F.data == "admin_list_promo", F.from_user.id.in_(SUPER_ADMINS))
+@router.callback_query(F.data == "admin_list_promo")
 async def admin_list_promo(callback: types.CallbackQuery):
+    if not db.has_permission(callback.from_user.id, 'promos'):
+        return await callback.answer("Ruxsat yo'q.", show_alert=True)
     promos = db.get_all_promo_codes()
     text = "📜 **Mavjud promo kodlar:**\n\n"
     kb = []
@@ -389,16 +574,20 @@ async def admin_list_promo(callback: types.CallbackQuery):
     await callback.message.edit_text(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=kb))
     await callback.answer()
 
-@router.callback_query(F.data.startswith("admin_pdel_"), F.from_user.id.in_(SUPER_ADMINS))
+@router.callback_query(F.data.startswith("admin_pdel_"))
 async def admin_promo_delete(callback: types.CallbackQuery):
+    if not db.has_permission(callback.from_user.id, 'promos'):
+        return await callback.answer("Ruxsat yo'q.", show_alert=True)
     p_id = int(callback.data.split("_")[2])
     db.delete_promo_code(p_id)
     await callback.message.answer("✅ Promo kod o'chirildi.")
     await admin_list_promo(callback)
 
 # --- Mailing Handlers ---
-@router.callback_query(F.data == "admin_send_mail", F.from_user.id.in_(SUPER_ADMINS))
+@router.callback_query(F.data == "admin_send_mail")
 async def admin_send_mail_start(callback: types.CallbackQuery, state: FSMContext):
+    if not db.has_permission(callback.from_user.id, 'mailing'):
+        return await callback.answer("Ruxsat yo'q.", show_alert=True)
     await callback.message.answer("Yubormoqchi bo'lgan xabaringizni yozing (matn, rasm yoki video):", reply_markup=cancel_kb())
     await state.set_state(AdminStates.mailing_content)
     await callback.answer()
@@ -414,8 +603,10 @@ async def admin_mailing_content(message: types.Message, state: FSMContext):
     await message.answer("Xabarni barcha foydalanuvchilarga yuborishni tasdiqlaysizmi?", reply_markup=InlineKeyboardMarkup(inline_keyboard=kb))
     await state.set_state(AdminStates.mailing_preview)
 
-@router.callback_query(F.data == "admin_mail_confirm", F.from_user.id.in_(SUPER_ADMINS), AdminStates.mailing_preview)
+@router.callback_query(F.data == "admin_mail_confirm", AdminStates.mailing_preview)
 async def admin_mail_confirm(callback: types.CallbackQuery, state: FSMContext):
+    if not db.has_permission(callback.from_user.id, 'mailing'):
+        return await callback.answer("Ruxsat yo'q.", show_alert=True)
     data = await state.get_data()
     users = db.get_all_users()
     count = 0
@@ -443,9 +634,13 @@ async def back_to_main_callback(callback: types.CallbackQuery):
 
 # ... (rest of existing worker order handlers) ...
 
-@router.message(Command("report"), F.from_user.id.in_(SUPER_ADMINS))
-@router.callback_query(F.data == "admin_report", F.from_user.id.in_(SUPER_ADMINS))
+@router.message(Command("report"))
+@router.callback_query(F.data == "admin_report")
 async def get_report_callback(event: types.Message | types.CallbackQuery):
+    if not db.has_permission(event.from_user.id, 'stats'):
+        if isinstance(event, types.CallbackQuery):
+            await event.answer("Ruxsat yo'q.", show_alert=True)
+        return
     message = event if isinstance(event, types.Message) else event.message
     try:
         import pandas as pd

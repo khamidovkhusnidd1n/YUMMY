@@ -42,6 +42,14 @@ class Database:
                 expiry_date TIMESTAMP
             )
         """)
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS admins (
+                user_id INTEGER PRIMARY KEY,
+                role TEXT DEFAULT 'admin',
+                permissions TEXT DEFAULT '',
+                added_at TIMESTAMP
+            )
+        """)
         self.conn.commit()
 
     def add_user(self, user_id, full_name, phone):
@@ -190,7 +198,40 @@ class Database:
     def get_all_promo_codes(self):
         return self.cursor.execute("SELECT * FROM promo_codes").fetchall()
 
-    # --- Users ---
+    # --- Admin Management ---
+    def add_admin(self, user_id, role='admin', permissions=''):
+        self.cursor.execute("INSERT OR REPLACE INTO admins (user_id, role, permissions, added_at) VALUES (?, ?, ?, ?)",
+                            (user_id, role, permissions, datetime.now()))
+        self.conn.commit()
+
+    def remove_admin(self, user_id):
+        self.cursor.execute("DELETE FROM admins WHERE user_id = ?", (user_id,))
+        self.conn.commit()
+
+    def get_admin(self, user_id):
+        return self.cursor.execute("SELECT * FROM admins WHERE user_id = ?", (user_id,)).fetchone()
+
+    def get_all_admins(self):
+        return self.cursor.execute("SELECT * FROM admins").fetchall()
+
+    def update_admin_role(self, user_id, role):
+        self.cursor.execute("UPDATE admins SET role = ? WHERE user_id = ?", (role, user_id))
+        self.conn.commit()
+
+    def update_admin_permissions(self, user_id, permissions):
+        self.cursor.execute("UPDATE admins SET permissions = ? WHERE user_id = ?", (permissions, user_id))
+        self.conn.commit()
+
+    def is_admin(self, user_id):
+        res = self.cursor.execute("SELECT 1 FROM admins WHERE user_id = ?", (user_id,)).fetchone()
+        return res is not None
+
+    def has_permission(self, user_id, permission):
+        admin = self.get_admin(user_id)
+        if not admin: return False
+        if admin[1] == 'super_admin': return True
+        return permission in admin[2].split(',')
+
     def get_all_users(self):
         return self.cursor.execute("SELECT user_id FROM users").fetchall()
 

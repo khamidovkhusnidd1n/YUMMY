@@ -28,9 +28,11 @@ def admin_profile_kb(is_super=False):
 def admin_reply_menu(is_super=False):
     kb = []
     if is_super:
-        kb.append([KeyboardButton(text="📊 Statistika"), KeyboardButton(text="📈 Analitika")])
-        kb.append([KeyboardButton(text="🍴 Menu Boshqaruvi")])
-        kb.append([KeyboardButton(text="📄 Excel Hisobot")])
+        kb.append([KeyboardButton(text="📊 Dashboard"), KeyboardButton(text="🛍 Buyurtmalar")])
+        kb.append([KeyboardButton(text="🍽 Menu Boshqaruvi")])
+        kb.append([KeyboardButton(text="🎟 Promolar"), KeyboardButton(text="📢 Mailing")])
+        kb.append([KeyboardButton(text="📉 Statistika"), KeyboardButton(text="📑 Hisobot (Excel)")])
+        kb.append([KeyboardButton(text="👥 Adminlar Boshqaruvi")])
     else:
         kb.append([KeyboardButton(text="🛍 Buyurtmalar"), KeyboardButton(text="📦 Worker Info")])
     kb.append([KeyboardButton(text="🏠 Foydalanuvchi menyusi")])
@@ -102,4 +104,55 @@ def order_next_stage_kb(order_id, current_stage):
         kb = [[InlineKeyboardButton(text="🏁 Yakunlash", callback_data=f"complete_{order_id}")]]
     else:
         return None
+    return InlineKeyboardMarkup(inline_keyboard=kb)
+
+def admin_management_kb():
+    kb = [
+        [InlineKeyboardButton(text="➕ Yangi admin qo'shish", callback_data="am_add")],
+        [InlineKeyboardButton(text="📜 Adminlar ro'yxati", callback_data="am_list")],
+        [InlineKeyboardButton(text="🔙 Orqaga", callback_data="admin_dashboard")]
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=kb)
+
+def admin_list_kb(admins):
+    kb = []
+    for admin in admins:
+        user_id, role, _, _ = admin
+        label = f"👤 {user_id} ({role})"
+        kb.append([InlineKeyboardButton(text=label, callback_data=f"am_view_{user_id}")])
+    kb.append([InlineKeyboardButton(text="🔙 Orqaga", callback_data="am_home")])
+    return InlineKeyboardMarkup(inline_keyboard=kb)
+
+def admin_view_kb(user_id, role):
+    kb = [
+        [InlineKeyboardButton(text="🎭 Rolni o'zgartirish", callback_data=f"am_edit_role_{user_id}")],
+        [InlineKeyboardButton(text="🔐 Huquqlarni boshqarish", callback_data=f"am_edit_perms_{user_id}")],
+        [InlineKeyboardButton(text="🗑 Adminni o'chirish", callback_data=f"am_del_{user_id}")],
+        [InlineKeyboardButton(text="🔙 Orqaga", callback_data="am_list")]
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=kb)
+
+def admin_role_kb(user_id):
+    kb = [
+        [InlineKeyboardButton(text="👑 Super Admin", callback_data=f"am_setrole_{user_id}_super_admin")],
+        [InlineKeyboardButton(text="🛠 Admin (Worker)", callback_data=f"am_setrole_{user_id}_admin")],
+        [InlineKeyboardButton(text="🔙 Bekor qilish", callback_data=f"am_view_{user_id}")]
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=kb)
+
+def admin_permissions_kb(user_id, current_perms):
+    perms = {
+        'menu': "🍽 Menu",
+        'orders': "🛍 Buyurtmalar",
+        'promos': "🎟 Promolar",
+        'mailing': "📢 Mailing",
+        'stats': "📊 Statistika"
+    }
+    kb = []
+    current_list = current_perms.split(',') if current_perms else []
+    for key, label in perms.items():
+        status = "✅" if key in current_list else "❌"
+        kb.append([InlineKeyboardButton(text=f"{status} {label}", callback_data=f"am_togperm_{user_id}_{key}")])
+    
+    kb.append([InlineKeyboardButton(text="✅ Saqlash", callback_data=f"am_view_{user_id}")])
     return InlineKeyboardMarkup(inline_keyboard=kb)
