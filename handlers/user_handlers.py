@@ -1,4 +1,4 @@
-from aiogram import Router, F, types
+﻿from aiogram import Router, F, types
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -107,8 +107,30 @@ async def get_method(message: types.Message, state: FSMContext):
     
     if message.text in [STR_UZ['method_delivery'], STR_RU['method_delivery'], STR_EN['method_delivery']]:
         await state.update_data(method='delivery')
-        await state.set_state(OrderState.location)
-        await message.answer(s['location_req'], reply_markup=kb.location_keyboard(lang))
+
+        # If WebApp already sent GPS, skip manual location step
+        existing = await state.get_data()
+        if existing.get('location') and existing.get('maps_url'):
+            items = user_basket.get(user_id, [])
+            if not items:
+                await message.answer("Error: Basket is empty.")
+                await state.clear()
+                return
+
+            total_price = sum(i['price'] * i['quantity'] for i in items)
+            items_str = "\n".join([f"- {i['name']} x {i['quantity']}" for i in items])
+            method_text = s['method_delivery'] + " " + s['delivery_fee_label']
+            await state.update_data(total_price=total_price, items_str=items_str, method_text=method_text)
+
+            user_data = await state.get_data()
+            if user_data.get('promo_code_from_app'):
+                await apply_promo_automatically(message, state, user_data['promo_code_from_app'])
+            else:
+                await message.answer(s['promo_req'], reply_markup=kb.promo_skip_kb(lang))
+                await state.set_state(OrderState.promo)
+        else:
+            await state.set_state(OrderState.location)
+            await message.answer(s['location_req'], reply_markup=kb.location_keyboard(lang))
     elif message.text in [STR_UZ['method_takeaway'], STR_RU['method_takeaway'], STR_EN['method_takeaway']]:
         await state.update_data(method='takeaway', location="O'zi olib ketadi", maps_url=None)
         
@@ -127,8 +149,13 @@ async def get_method(message: types.Message, state: FSMContext):
         method_text = s['method_takeaway'] + " " + s['takeaway_label']
         await state.update_data(total_price=total_price, items_str=items_str, method_text=method_text)
         
-        await message.answer(s['promo_req'], reply_markup=kb.promo_skip_kb(lang))
-        await state.set_state(OrderState.promo)
+        # Check if promo code was provided in WebApp
+        data = await state.get_data()
+        if data.get('promo_code_from_app'):
+            await apply_promo_automatically(message, state, data['promo_code_from_app'])
+        else:
+            await message.answer(s['promo_req'], reply_markup=kb.promo_skip_kb(lang))
+            await state.set_state(OrderState.promo)
     else:
         await message.answer(s['method_req'], reply_markup=kb.delivery_method_kb(lang))
 
@@ -164,8 +191,13 @@ async def get_location(message: types.Message, state: FSMContext):
     items_str = "\n".join([f"- {i['name']} x {i['quantity']}" for i in items])
     await state.update_data(location=location_str, maps_url=maps_url, total_price=total_price, items_str=items_str, method_text=method_text)
 
-    await message.answer(s['promo_req'], reply_markup=kb.promo_skip_kb(lang))
-    await state.set_state(OrderState.promo)
+    # Check if promo code was provided in WebApp
+    user_data = await state.get_data()
+    if user_data.get('promo_code_from_app'):
+        await apply_promo_automatically(message, state, user_data['promo_code_from_app'])
+    else:
+        await message.answer(s['promo_req'], reply_markup=kb.promo_skip_kb(lang))
+        await state.set_state(OrderState.promo)
 
 @router.message(OrderState.promo)
 async def apply_promo(message: types.Message, state: FSMContext):
@@ -186,6 +218,21 @@ async def apply_promo(message: types.Message, state: FSMContext):
         await show_order_summary(message, state)
     else:
         await message.answer(s['promo_invalid'], reply_markup=kb.promo_skip_kb(lang))
+
+async def apply_promo_automatically(message: types.Message, state: FSMContext, code: str):
+    lang = db.get_user_lang(message.from_user.id)
+    s = STRINGS[lang]
+    code = code.upper()
+    promo = db.get_promo_code(code)
+    
+    if promo:
+        discount = promo[2]
+        await state.update_data(promo_code=code, discount_percent=discount)
+        await message.answer(s['promo_applied'].format(percent=discount))
+    else:
+        await message.answer(s['promo_invalid'])
+    
+    await show_order_summary(message, state)
 
 async def show_order_summary(message: types.Message, state: FSMContext):
     lang = db.get_user_lang(message.from_user.id)
@@ -277,5 +324,20 @@ async def web_app_data_handler(message: types.Message, state: FSMContext):
     
     if data.get('type') == 'order':
         user_basket[message.from_user.id] = data.get('items', [])
+        # Save promo code from WebApp
+        await state.update_data(promo_code_from_app=data.get('promo_code'))
+
+        # Save GPS from WebApp (if user allowed location)
+        loc = data.get('location')
+        if isinstance(loc, dict) and loc.get('lat') is not None and loc.get('lon') is not None:
+            lat = loc.get('lat')
+            lon = loc.get('lon')
+            location_str = f"📍 ({lat}, {lon})"
+            maps_url = f"https://www.google.com/maps?q={lat},{lon}"
+            await state.update_data(location=location_str, maps_url=maps_url)
+
         await state.set_state(OrderState.phone)
         await message.answer(s['phone_req'], reply_markup=kb.phone_keyboard(lang))
+
+
+

@@ -1,11 +1,11 @@
-STRINGS = {
+﻿STRINGS = {
     'uz': {
         'welcome': "Xush kelibsiz {name}!\nYummy botga xush kelibsiz.",
         'select_lang': "Iltimos, tilni tanlang:",
         'main_menu_btn': "🚀 Yummy App",
         'phone_req': "Telefon raqamingizni yuboring:",
         'phone_btn': "📞 Telefon raqamni yuborish",
-        'location_req': "Iltimos, manzilni matn shaklida yozib yuboring (Masalan: Yangiyo'l, Saxrniy Havas yonida):",
+        'location_req': "Iltimos, manzilni yuboring: pastdagi 📍 tugmani bosing (avto aniqlanadi) yoki matn yozing (Masalan: Yangiyo'l, Saxrniy Havas yonida):",
         'location_btn': "📍 Joylashuvni yuborish",
         'confirm_summary': "📊 **Buyurtmangizni tekshiring:**\n\n🍱 **Taomlar:**\n{items}\n\n📍 **Manzil:** {location}\n💰 **Jami:** {total:,} so'm\n\nHamma ma'lumotlar to'g'rimi?",
         'confirm_btn': "✅ Tasdiqlash",
@@ -45,7 +45,7 @@ STRINGS = {
         'main_menu_btn': "🚀 Yummy App",
         'phone_req': "Отправьте ваш номер телефона:",
         'phone_btn': "📞 Отправить номер телефона",
-        'location_req': "Пожалуйста, отправьте ваш адрес текстом (Например: Янгиюль, рядом с Saxrniy Havas):",
+        'location_req': "Отправьте ваш адрес: нажмите кнопку 📍 (авто-локация) или напишите текстом (Например: Янгиюль, рядом с Saxrniy Havas):",
         'location_btn': "📍 Отправить местоположение",
         'confirm_summary': "📊 **Проверьте ваш заказ:**\n\n🍱 **Блюда:**\n{items}\n\n🛒 **Способ:** {method}\n📍 **Адрес:** {location}\n💰 **Итого:** {total:,} сум\n\nВсе данные верны?",
         'confirm_btn': "✅ Подтвердить",
@@ -84,7 +84,7 @@ STRINGS = {
         'main_menu_btn': "🚀 Yummy App",
         'phone_req': "Send your phone number:",
         'phone_btn': "📞 Send phone number",
-        'location_req': "Please send your address as text (Example: Yangiyul, near Saxrniy Havas):",
+        'location_req': "Send your address: press the 📍 button (auto location) or type it (Example: Yangiyul, near Saxrniy Havas):",
         'location_btn': "📍 Send location",
         'location_btn_menu': "📍 Location",
         'about_btn_menu': "ℹ️ About Us",
@@ -107,3 +107,4 @@ STRINGS = {
         'skip_btn': "Skip ➡️"
     }
 }
+
