@@ -11,7 +11,7 @@ def lang_keyboard():
 
 def main_menu(lang='uz', is_admin=False):
     s = STRINGS[lang]
-    url = f"https://khamidovkhusnidd1n.github.io/Yummy/?lang={lang}"
+    url = f"https://khamidovkhusnidd1n.github.io/Yummy/?lang={lang}&v=20260127"
     
     kb = [
         [KeyboardButton(text=s['main_menu_btn'], web_app=WebAppInfo(url=url))],
@@ -53,6 +53,7 @@ def promo_skip_kb(lang='uz'):
     s = STRINGS[lang]
     kb = [[KeyboardButton(text=s.get('skip_btn', 'Skip ➡️'))]]
     return ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+
 
 
 

@@ -527,14 +527,14 @@
             container.innerHTML = Object.keys(MENU_DATA).map(cat => {
                 const safeId = cat.replace(/[^a-zA-Z0-9]/g, '');
                 return `
-                    <div id="section-${safeId}" class="menu-section mb-12" data-category="${cat}">
+                    <div id="section-${safeId}" class="menu-section mb-10" data-category="${cat}">
                         <div class="px-6 mb-4">
-                            <h2 class="text-2xl font-black tracking-tighter text-gray-900 dark:text-white flex items-center gap-3">
-                                <span class="w-1.5 h-8 bg-red-600 rounded-full"></span>
+                            <h2 class="text-xl font-black tracking-tighter text-gray-900 dark:text-white flex items-center gap-2">
+                                <span class="w-1 h-6 bg-red-600 rounded-full"></span>
                                 ${S.cats[cat] || cat}
                             </h2>
                         </div>
-                        <div class="px-6 grid grid-cols-2 gap-4">
+                        <div class="px-6 grid grid-cols-2 gap-3">
                             ${MENU_DATA[cat].map(item => renderProductCard(item)).join('')}
                         </div>
                     </div>
@@ -544,10 +544,10 @@
             setTimeout(initScrollSpy, 100);
         }
 
-
         function renderProductCard(item) {
             const baseName = item.raw_name || item.n || item.name;
-            const name = (ITEM_NAMES[CURRENT_LANG] && ITEM_NAMES[CURRENT_LANG][baseName]) || item.name || baseName;
+            const keyName = (baseName ? String(baseName).trim() : baseName);
+            const name = (ITEM_NAMES[CURRENT_LANG] && ITEM_NAMES[CURRENT_LANG][keyName]) || item.name || keyName;
             const price = item.p || item.price;
             const img = item.i || item.image;
             return `
@@ -659,10 +659,10 @@
         function renderCartItems() {
             const container = document.getElementById('cart-items');
             let total = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-            if (cart.length === 0) { container.innerHTML = `<div class="py-10 text-center text-gray-400 font-bold tracking-tight">${S.cart_empty}</div>`; }
+            if (cart.length === 0) { container.innerHTML = `< div class="py-10 text-center text-gray-400 font-bold tracking-tight" > ${S.cart_empty}</div > `; }
             else {
                 container.innerHTML = cart.map(item => `
-                    <div class="flex items-center gap-5 animate-item">
+                    < div class="flex items-center gap-5 animate-item" >
                         <div class="w-20 h-20 rounded-[28px] bg-gray-50 flex-shrink-0 overflow-hidden shadow-sm">
                             <img src="${item.image}" 
                                  onerror="this.onerror=null; this.src='images/burger.png';"
@@ -674,12 +674,12 @@
                             <span class="text-sm font-black w-4 text-center">${item.quantity}</span>
                             <button onclick="changeQty(${item.id}, 1)" class="w-8 h-8 rounded-2xl bg-white dark:bg-zinc-700 shadow-md flex items-center justify-center font-black">+</button>
                         </div>
-                    </div>
-                `).join('');
+                    </div >
+                    `).join('');
             }
             const deliveryFee = 15000;
             const finalTotal = total > 0 ? total + deliveryFee : 0;
-            document.getElementById('cart-total').innerHTML = `<div class="text-right"><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">${S.food_label}: ${total.toLocaleString()} so'm</p><p class="text-[10px] text-red-500 font-bold uppercase tracking-widest mb-2">${S.deliv_label}: ${deliveryFee.toLocaleString()} so'm</p><p class="text-4xl font-black tracking-tighter text-red-600">${finalTotal.toLocaleString()} so'm</p></div>`;
+            document.getElementById('cart-total').innerHTML = `< div class="text-right" ><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">${S.food_label}: ${total.toLocaleString()} so'm</p><p class="text-[10px] text-red-500 font-bold uppercase tracking-widest mb-2">${S.deliv_label}: ${deliveryFee.toLocaleString()} so'm</p><p class="text-4xl font-black tracking-tighter text-red-600">${finalTotal.toLocaleString()} so'm</p></div >`;
         }
 
         window.changeQty = (id, delta) => { const idx = cart.findIndex(i => i.id === id); cart[idx].quantity += delta; if (cart[idx].quantity <= 0) cart.splice(idx, 1); renderCartItems(); updateCartUI(); if (cart.length === 0) closeCart(); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
