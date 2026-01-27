@@ -304,6 +304,89 @@
 
         const S = LANG_STRINGS[CURRENT_LANG] || LANG_STRINGS['uz'];
 
+        const ITEM_NAMES = {
+            uz: {
+                // Menu data is authored in Uzbek; mapping is optional here.
+            },
+            ru: {
+                "Standart": "Стандарт",
+                "Pishloqli": "С сыром",
+                "Big": "Большой",
+                "Big pishloq": "Большой с сыром",
+                "Big (45sm)": "Большой (45 см)",
+                "Canada (45sm)": "Канада (45 см)",
+                "Super (45sm)": "Супер (45 см)",
+                "Chiz": "Сырный",
+                "Gamburger": "Гамбургер",
+                "Chizburger": "Чизбургер",
+                "Double": "Дабл",
+                "Double chiz": "Дабл чиз",
+                "Go'shtli": "С мясом",
+                "Pishloqli tovuq": "Сырная курица",
+                "Nuggets": "Наггетсы",
+                "Nuggets mini": "Наггетсы мини",
+                "File strips": "Стрипсы",
+                "Qanot": "Крылышки",
+                "Kartoshka": "Картошка фри",
+                "Lunch box": "Ланч-бокс",
+                "Mini": "Мини",
+                "Twins": "Твинс",
+                "Sous": "Соус",
+                "Yostiqchalar": "Подушечки",
+                "Yostiqchalar mini": "Подушечки мини",
+                "Choy": "Чай",
+                "Choy mevali": "Фруктовый чай",
+                "O'rmon mevalari": "Лесные ягоды",
+                "Ko'k": "Синий",
+                "Kofe": "Кофе",
+                "Kofe (Big)": "Кофе (большой)",
+                "Moxito": "Мохито",
+                "Tropic": "Тропик",
+                "Xot let": "Горячий латте",
+                "Kfc xaggi": "KFC Хагги",
+                "Kfc BURGER (+0.25 Cola)": "KFC BURGER (+0.25 Cola)",
+                "Kfc HAGGI (+0.25 Cola)": "KFC HAGGI (+0.25 Cola)"
+            },
+            en: {
+                "Standart": "Standard",
+                "Pishloqli": "Cheese",
+                "Big": "Big",
+                "Big pishloq": "Big cheese",
+                "Big (45sm)": "Big (45 cm)",
+                "Canada (45sm)": "Canada (45 cm)",
+                "Super (45sm)": "Super (45 cm)",
+                "Chiz": "Cheese",
+                "Gamburger": "Hamburger",
+                "Chizburger": "Cheeseburger",
+                "Double": "Double",
+                "Double chiz": "Double cheese",
+                "Go'shtli": "Meat",
+                "Pishloqli tovuq": "Cheesy chicken",
+                "Nuggets": "Nuggets",
+                "Nuggets mini": "Nuggets mini",
+                "File strips": "Fillet strips",
+                "Qanot": "Wings",
+                "Kartoshka": "Fries",
+                "Lunch box": "Lunch box",
+                "Mini": "Mini",
+                "Twins": "Twins",
+                "Sous": "Sauce",
+                "Yostiqchalar": "Cheese pillows",
+                "Yostiqchalar mini": "Mini cheese pillows",
+                "Choy": "Tea",
+                "Choy mevali": "Fruit tea",
+                "O'rmon mevalari": "Forest berries",
+                "Ko'k": "Blue",
+                "Kofe": "Coffee",
+                "Kofe (Big)": "Coffee (Large)",
+                "Moxito": "Mojito",
+                "Tropic": "Tropical",
+                "Xot let": "Hot latte",
+                "Kfc xaggi": "KFC Haggi",
+                "Kfc BURGER (+0.25 Cola)": "KFC BURGER (+0.25 Cola)",
+                "Kfc HAGGI (+0.25 Cola)": "KFC HAGGI (+0.25 Cola)"
+            }
+        };
         // Apply Static Translations
         document.getElementById('search-input').placeholder = S.search_placeholder;
         document.querySelector('.bg-red-600.text-white.text-\\[10px\\]').innerText = S.top_choice;
@@ -408,7 +491,8 @@
         const FLAT_ITEMS = [];
         Object.keys(MENU_DATA).forEach(cat => {
             MENU_DATA[cat].forEach(item => {
-                FLAT_ITEMS.push({ id: idCounter++, name: item.n, price: item.p, image: item.i, cat: cat });
+                const translatedName = (ITEM_NAMES[CURRENT_LANG] && ITEM_NAMES[CURRENT_LANG][item.n]) || item.n;
+                FLAT_ITEMS.push({ id: idCounter++, name: translatedName, price: item.p, image: item.i, cat: cat });
             });
         });
 
@@ -429,7 +513,6 @@
             const container = document.getElementById('menu-sections');
 
             if (searchTerm) {
-                // Render search results as a grid
                 const filtered = FLAT_ITEMS.filter(i => i.name.toLowerCase().includes(searchTerm.toLowerCase()));
                 container.innerHTML = `
                     <div class="px-6 grid grid-cols-2 gap-4">
@@ -440,24 +523,27 @@
                 return;
             }
 
-            // Group by category for horizontal scrolling sections
+            // Continuous vertical flow of all categories
             container.innerHTML = Object.keys(MENU_DATA).map(cat => {
                 const safeId = cat.replace(/[^a-zA-Z0-9]/g, '');
                 return `
-                    <section id="section-${safeId}" class="menu-section space-y-4 pt-4" data-category="${cat}">
-                        <div class="px-6 flex justify-between items-center">
-                            <h2 class="text-xl font-black tracking-tighter">${S.cats[cat] || cat}</h2>
+                    <div id="section-${safeId}" class="menu-section mb-12" data-category="${cat}">
+                        <div class="px-6 mb-4">
+                            <h2 class="text-2xl font-black tracking-tighter text-gray-900 dark:text-white flex items-center gap-3">
+                                <span class="w-1.5 h-8 bg-red-600 rounded-full"></span>
+                                ${S.cats[cat] || cat}
+                            </h2>
                         </div>
                         <div class="px-6 grid grid-cols-2 gap-4">
                             ${MENU_DATA[cat].map(item => renderProductCard(item)).join('')}
-
                         </div>
-                    </section>
+                    </div>
                 `;
             }).join('');
-            setTimeout(initScrollSpy, 100);
 
+            setTimeout(initScrollSpy, 100);
         }
+
 
         function renderProductCard(item) {
             const name = item.n || item.name;
@@ -653,3 +739,5 @@
 </body>
 
 </html>
+
+
