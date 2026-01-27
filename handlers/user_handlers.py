@@ -167,15 +167,15 @@ async def get_location(message: types.Message, state: FSMContext):
     await message.answer(s['promo_req'], reply_markup=kb.promo_skip_kb(lang))
     await state.set_state(OrderState.promo)
 
-@router.callback_query(OrderState.promo, F.data == "skip_promo")
-async def skip_promo(callback: types.CallbackQuery, state: FSMContext):
-    await show_order_summary(callback.message, state)
-    await callback.answer()
-
 @router.message(OrderState.promo)
 async def apply_promo(message: types.Message, state: FSMContext):
     lang = db.get_user_lang(message.from_user.id)
     s = STRINGS[lang]
+    
+    if message.text == s.get('skip_btn', 'Skip ➡️'):
+        await show_order_summary(message, state)
+        return
+
     code = message.text.upper()
     promo = db.get_promo_code(code)
     
@@ -212,66 +212,61 @@ async def show_order_summary(message: types.Message, state: FSMContext):
     await state.set_state(OrderState.confirm)
     await message.answer(confirm_text, reply_markup=kb.order_confirm_kb(lang), parse_mode="Markdown")
 
-@router.callback_query(OrderState.confirm, F.data == "user_confirm")
-async def finalize_order(callback: types.CallbackQuery, state: FSMContext):
-    lang = db.get_user_lang(callback.from_user.id)
+@router.message(OrderState.confirm)
+async def process_confirm(message: types.Message, state: FSMContext):
+    lang = db.get_user_lang(message.from_user.id)
     s = STRINGS[lang]
-    data = await state.get_data()
-    user_id = callback.from_user.id
-    user_name = callback.from_user.full_name
-    user_username = f"@{callback.from_user.username}" if callback.from_user.username else "Noma'lum"
     
-    order_id = db.create_order(
-        user_id=user_id,
-        items=data['items_str'],
-        total_price=data['final_total'],
-        promo_code=data.get('promo_code'),
-        discount_amount=data.get('discount_amount', 0),
-        method=data.get('method'),
-        location=data.get('location')
-    )
-    db.add_user(user_id, user_name, user_username, data['phone'])
+    if message.text == s['confirm_btn']:
+        data = await state.get_data()
+        user_id = message.from_user.id
+        user_name = message.from_user.full_name
+        user_username = f"@{message.from_user.username}" if message.from_user.username else "Noma'lum"
+        
+        order_id = db.create_order(
+            user_id=user_id,
+            items=data['items_str'],
+            total_price=data['final_total'],
+            promo_code=data.get('promo_code'),
+            discount_amount=data.get('discount_amount', 0),
+            method=data.get('method'),
+            location=data.get('location')
+        )
+        db.add_user(user_id, user_name, user_username, data['phone'])
 
-    is_admin = (user_id in (SUPER_ADMINS + WORKERS)) and bool(db.get_admin(user_id))
-    await callback.message.edit_text(s['order_received'].format(id=order_id))
-    await callback.message.answer("🏠 Foydalanuvchi menyusi", reply_markup=kb.main_menu(lang, is_admin))
-    
-    # Notify Admin (Worker)
-    admin_msg = f"🆕 Yangi buyurtma #{order_id}!\n\n"
-    admin_msg += f"👤 Mijoz: {user_name}\n"
-    admin_msg += f"🆔 Nickname: [{user_username}](tg://user?id={user_id})\n"
-    admin_msg += f"📞 Tel: {data['phone']}\n"
-    
-    if 'promo_code' in data:
-        admin_msg += f"🎟 Promo: {data['promo_code']} (-{data['discount_percent']}%)\n"
+        is_admin = (user_id in (SUPER_ADMINS + WORKERS)) and bool(db.get_admin(user_id))
+        await message.answer(s['order_received'].format(id=order_id), reply_markup=kb.main_menu(lang, is_admin))
+        
+        # Notify Admin (Worker)
+        admin_msg = f"🆕 Yangi buyurtma #{order_id}!\n\n"
+        admin_msg += f"👤 Mijoz: {user_name}\n"
+        admin_msg += f"🆔 Nickname: [{user_username}](tg://user?id={user_id})\n"
+        admin_msg += f"📞 Tel: {data['phone']}\n"
+        
+        if 'promo_code' in data:
+            admin_msg += f"🎟 Promo: {data['promo_code']} (-{data['discount_percent']}%)\n"
 
-    method_str = "🛵 Kuryer orqali" if data.get('method') == 'delivery' else "🏃 O'zi boradi (Self-pickup)"
-    admin_msg += f"🛒 Usul: {method_str}\n"
-    
-    loc_val = data.get('maps_url') or "Mavjud emas (O'zi boradi)"
-    admin_msg += f"📍 Manzil: {loc_val}\n\n"
-    admin_msg += f"🧾 Taomlar:\n{data['items_str']}\n\n"
-    admin_msg += f"💰 Jami: {data['final_total']:,} so'm"
+        method_str = "🛵 Kuryer orqali" if data.get('method') == 'delivery' else "🏃 O'zi boradi (Self-pickup)"
+        admin_msg += f"🛒 Usul: {method_str}\n"
+        
+        loc_val = data.get('maps_url') or "Mavjud emas (O'zi boradi)"
+        admin_msg += f"📍 Manzil: {loc_val}\n\n"
+        admin_msg += f"🧾 Taomlar:\n{data['items_str']}\n\n"
+        admin_msg += f"💰 Jami: {data['final_total']:,} so'm"
 
-    from keyboards.admin_keyboards import order_initial_kb
-    for worker_id in WORKERS:
-        try:
-            await callback.bot.send_message(worker_id, admin_msg, reply_markup=order_initial_kb(order_id), parse_mode="Markdown")
-        except:
-            pass
+        from keyboards.admin_keyboards import order_initial_kb
+        for worker_id in WORKERS:
+            try:
+                await message.bot.send_message(worker_id, admin_msg, reply_markup=order_initial_kb(order_id), parse_mode="Markdown")
+            except:
+                pass
 
-    user_basket[user_id] = []
-    await state.clear()
-    await callback.answer()
-
-@router.callback_query(OrderState.confirm, F.data == "user_cancel")
-async def cancel_order(callback: types.CallbackQuery, state: FSMContext):
-    lang = db.get_user_lang(callback.from_user.id)
-    s = STRINGS[lang]
-    await state.clear()
-    await callback.message.edit_text(s['order_cancelled'])
-    await callback.message.answer(".", reply_markup=kb.main_menu(lang))
-    await callback.answer()
+        user_basket[user_id] = []
+        await state.clear()
+        
+    elif message.text == s['cancel_btn']:
+        await state.clear()
+        await message.answer(s['order_cancelled'], reply_markup=kb.main_menu(lang))
 
 @router.message(F.content_type == types.ContentType.WEB_APP_DATA)
 async def web_app_data_handler(message: types.Message, state: FSMContext):
