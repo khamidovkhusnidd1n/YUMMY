@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
     <script>
         // Early theme init to prevent white flash
-        (function() {
+        (function () {
             const THEME_STORAGE_KEY = 'yummy_theme';
             try {
                 const saved = localStorage.getItem(THEME_STORAGE_KEY);
@@ -888,7 +888,7 @@
         const _pi = document.getElementById('promo-input');
         if (_pi) _pi.placeholder = S.promo_placeholder;
 
-        const MENU_DATA = {
+        const APP_MENU_DATA = {
             "🔥 Specials": [
                 { "n": "Kfc BURGER (+0.25 Cola)", "p": 33000, "i": "images/image2/kfc_burger.png" },
                 { "n": "Kfc HAGGI (+0.25 Cola)", "p": 38000, "i": "images/image2/kfc_haggi_cola.png" }
@@ -969,10 +969,11 @@
         const searchFilters = safeGetById('search-filters');
         const searchResultCount = safeGetById('search-result-count');
 
-        // --- DYNAMIC DATA INTEGRATION ---
+        // --- DYNAMIC DATA INTEGRATION (DISABLED TO FIX IMAGES) ---
+        /*
         if (window.DYNAMIC_MENU_DATA) {
             // Apply dynamic menu data
-            Object.assign(MENU_DATA, window.DYNAMIC_MENU_DATA);
+            Object.assign(APP_MENU_DATA, window.DYNAMIC_MENU_DATA);
 
             // Apply dynamic translations
             if (window.DYNAMIC_CATS) {
@@ -983,9 +984,10 @@
 
             // Clear items not in dynamic data (optional, but effectively we act as if MENU_DATA is the source)
             // Ideally we would replace MENU_DATA entirely:
-            Object.keys(MENU_DATA).forEach(key => delete MENU_DATA[key]);
-            Object.assign(MENU_DATA, window.DYNAMIC_MENU_DATA);
+            Object.keys(APP_MENU_DATA).forEach(key => delete APP_MENU_DATA[key]);
+            Object.assign(APP_MENU_DATA, window.DYNAMIC_MENU_DATA);
         }
+        */
         // -------------------------------
 
         function translate(key, type = 'item') {
@@ -998,13 +1000,13 @@
         let cart = [];
         let idCounter = 1;
         const FLAT_ITEMS = [];
-        const CATEGORIES = Object.keys(MENU_DATA);
+        const CATEGORIES = Object.keys(APP_MENU_DATA);
         let currentCategoryIndex = 0;
         let isLoadingMore = false;
         let paginationMode = false;
 
-        Object.keys(MENU_DATA).forEach(cat => {
-            MENU_DATA[cat].forEach(item => {
+        Object.keys(APP_MENU_DATA).forEach(cat => {
+            APP_MENU_DATA[cat].forEach(item => {
                 FLAT_ITEMS.push({ id: idCounter++, raw_name: item.n, price: item.p, image: item.i, cat });
             });
         });
@@ -1012,7 +1014,7 @@
         function renderCategories() {
             const container = safeGetById('categories-container');
             if (!container) return;
-            container.innerHTML = Object.keys(MENU_DATA).map(cat => {
+            container.innerHTML = Object.keys(APP_MENU_DATA).map(cat => {
                 const safeId = cat.replace(/[^a-zA-Z0-9]/g, '');
                 return `
                     <button id="nav-${safeId}" onclick="selectCategory('${cat}')" 
@@ -1034,7 +1036,7 @@
                         </h2>
                     </div>
                     <div class="px-6 grid grid-cols-2 gap-3">
-                        ${MENU_DATA[cat].map(item => renderProductCard(item)).join('')}
+                        ${APP_MENU_DATA[cat].map(item => renderProductCard(item)).join('')}
                     </div>
                 </div>
             `;
