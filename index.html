@@ -54,11 +54,11 @@
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         }
 
-        .category-item {
+        .category-btn {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .category-item:active {
+        .category-btn:active {
             transform: scale(0.9);
         }
 
@@ -98,6 +98,22 @@
         .dark .sticky-cats {
             background: rgba(12, 12, 12, 0.9);
         }
+
+        .animate-item {
+            animation: slideUp 0.6s cubic-bezier(0.2, 0, 0.2, 1) both;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 
@@ -129,85 +145,58 @@
 
     <!-- Search Box -->
     <div id="search-container" class="fixed top-20 left-0 right-0 z-40 px-6 py-4 hidden animate-item">
-        <input type="text" id="search-input" placeholder="Qanday taom qidiramiz? 🔎"
+        <input type="text" id="search-input" placeholder="Search..."
             class="w-full h-14 bg-white dark:bg-zinc-900 rounded-3xl px-6 font-bold shadow-2xl border-2 border-red-500/20 focus:border-red-500 outline-none transition-all">
     </div>
 
-    <!-- Featured Section -->
+    <!-- Featured -->
     <section class="mt-28 px-6">
         <div class="relative w-full h-52 rounded-[45px] overflow-hidden shadow-2xl group">
             <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1000&fit=crop"
                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
             <div
                 class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-8 flex flex-col justify-end">
-                <span
-                    class="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full w-fit mb-3 tracking-widest">TOP
-                    TANLOV</span>
-                <h2 class="text-white text-2xl font-black tracking-tight">Bugun nima yeymiz?</h2>
-                <p class="text-white/60 text-xs font-bold mt-1">Barcha taomlar 100% tabiiy va mazali!</p>
+                <span id="top-choice-label"
+                    class="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full w-fit mb-3 tracking-widest uppercase">TOP
+                    CHOICE</span>
+                <h2 id="featured-title" class="text-white text-2xl font-black tracking-tight">What shall we eat today?
+                </h2>
+                <p id="featured-sub" class="text-white/60 text-xs font-bold mt-1">100% natural and delicious!</p>
             </div>
         </div>
     </section>
 
-    <!-- Categories (Sticky) -->
+    <!-- Categories -->
     <div id="categories-container"
         class="sticky top-[72px] left-0 right-0 py-4 px-6 flex gap-3 overflow-x-auto no-scrollbar sticky-cats scroll-px-6 snap-x">
-        <!-- JS renders this -->
     </div>
 
-    <!-- Menu Sections (Vertical Flow) -->
-    <div id="menu-sections" class="mt-6 space-y-8 pb-12 w-full flex flex-col">
-        <!-- JS renders all categories and products vertically here -->
-    </div>
+    <!-- Menu -->
+    <div id="menu-sections" class="mt-6 space-y-8 pb-12 w-full flex flex-col"></div>
 
-
-    <!-- Simple Cart Sheet (Overlay) -->
+    <!-- Cart Modal -->
     <div id="cart-modal" class="fixed inset-0 z-[60] hidden">
         <div id="cart-overlay"
             class="absolute inset-0 bg-black/60 backdrop-blur-md opacity-0 transition-opacity duration-500"></div>
         <div id="cart-sheet"
             class="absolute bottom-0 left-0 right-0 bg-white dark:bg-[#0f0f0f] rounded-t-[50px] min-h-[70vh] p-8 translate-y-full transition-transform duration-500 flex flex-col">
             <div class="w-16 h-1.5 bg-gray-200 dark:bg-zinc-800 rounded-full mx-auto mb-8"></div>
-
             <div class="flex justify-between items-center mb-8">
                 <div>
-                    <h2 class="text-3xl font-black tracking-tight">Savat</h2>
-                    <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Siz tanlagan mazali
-                        taomlar</p>
+                    <h2 id="cart-title" class="text-3xl font-black tracking-tight">Cart</h2>
+                    <p id="cart-sub" class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Your
+                        selected items</p>
                 </div>
-                <button id="clear-cart"
-                    class="text-red-500 font-black text-xs uppercase tracking-wider">Tozalash</button>
+                <button id="clear-cart" class="text-red-500 font-black text-xs uppercase tracking-wider">Clear</button>
             </div>
-
-            <div id="cart-items" class="flex-grow space-y-6 overflow-y-auto max-h-[40vh] pr-2">
-                <!-- JS renders items -->
-            </div>
-
+            <div id="cart-items" class="flex-grow space-y-6 overflow-y-auto max-h-[40vh] pr-2"></div>
             <div class="mt-10 border-t border-gray-100 dark:border-zinc-800 pt-8">
-                <!-- Promo Code Section -->
-                <div class="mb-6">
-                    <div class="relative group">
-                        <input type="text" id="promo-input" placeholder="Promo kod (ixtiyoriy)"
-                            class="w-full h-14 bg-gray-50 dark:bg-zinc-900 border-2 border-transparent focus:border-red-500/20 rounded-3xl px-6 font-bold outline-none transition-all uppercase placeholder:normal-case">
-                        <div
-                            class="absolute right-5 top-1/2 -translate-y-1/2 opacity-30 group-focus-within:opacity-100 transition-opacity">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"
-                                viewBox="0 0 24 24">
-                                <path
-                                    d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                <path d="M9 3v2m0 4v2m0 4v2" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="cart-total" class="flex justify-between items-end mb-8">
-                    <!-- JS renders total -->
-                </div>
-
+                <input type="text" id="promo-input" placeholder="Promo code"
+                    class="w-full h-14 bg-gray-50 dark:bg-zinc-900 rounded-3xl px-6 font-bold outline-none mb-6 uppercase">
+                <div id="cart-total" class="flex justify-between items-end mb-8"></div>
                 <button id="checkout-btn"
                     class="w-full h-18 py-5 price-tag rounded-[30px] font-black text-white text-lg shadow-2xl shadow-red-500/40 active:scale-95 transition-all flex items-center justify-center gap-3">
-                    <span>BUYURTMA BERISH</span>
+                    <span id="order-btn-text">PLACE ORDER</span>
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                         <path d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                     </svg>
@@ -219,11 +208,10 @@
     <script>
         const tg = window.Telegram.WebApp;
         const urlParams = new URLSearchParams(window.location.search);
-        const CURRENT_LANG = urlParams.get('lang') || 'uz';
+        const CURRENT_LANG = (urlParams.get('lang') || 'uz').toLowerCase().split('-')[0];
 
         const LANG_STRINGS = {
-            'uz': {
-                'delivery': 'Premium Yetkazib Berish',
+            uz: {
                 'search_placeholder': 'Qanday taom qidiramiz? 🔎',
                 'top_choice': 'TOP TANLOV',
                 'featured_title': 'Bugun nima yeymiz?',
@@ -232,24 +220,21 @@
                 'cart_title': 'Savat',
                 'cart_sub': 'Siz tanlagan mazali taomlar',
                 'cart_empty': 'Savatingiz bo\'sh 🛒',
-                'total_label': 'Umumiy hisob',
-                'order_btn': 'BUYURTMA BERISH',
-                'promo_placeholder': 'Promo kod (ixtiyoriy)',
-
                 'food_label': 'Taomlar',
                 'deliv_label': 'Yetkazish',
+                'order_btn': 'BUYURTMA BERISH',
                 'confirm_btn': 'TASDIQLASH',
+                'promo_placeholder': 'Promo kod (ixtiyoriy)',
                 'cats': {
                     "🌯 Lavash": "🌯 Lavash", "🍔 Burger": "🍔 Burger", "🥙 Doner": "🥙 Doner",
                     "🍗 KFC": "🍗 KFC", "🌭 Xot-dog": "🌭 Xot-dog", "🥪 Xaggi": "🥪 Xaggi",
-                    "🍗 Naggets": "🍗 Nuggets", "🧀 Pishloqli yostiqchalar": "🧀 Pishloqli yostiqchalar",
+                    "🍗 Naggets": "🍗 Naggets", "🧀 Pishloqli yostiqchalar": "🧀 Pishloqli yostiqchalar",
                     "🥪 Klab sandwich": "🥪 Klab", "🍟 Fri": "🍟 Fri", "🥟 Somsa": "🥟 Somsa",
                     "☕️ Ichimliklar": "☕️ Ichimliklar", "🍹 Cocktails": "🍹 Cocktails",
                     "🔥 Specials": "🔥 Maxsus", "🥫 Souslar": "🥫 Souslar"
                 }
             },
-            'ru': {
-                'delivery': 'Премиум Доставка',
+            ru: {
                 'search_placeholder': 'Что будем искать? 🔎',
                 'top_choice': 'ТОП ВЫБОР',
                 'featured_title': 'Что поедим сегодня?',
@@ -258,13 +243,11 @@
                 'cart_title': 'Корзина',
                 'cart_sub': 'Ваши выбранные блюда',
                 'cart_empty': 'Корзина пуста 🛒',
-                'total_label': 'Общая сумма',
-                'order_btn': 'ОФОРМИТЬ ЗАКАЗ',
-                'promo_placeholder': 'Промокод (необязательно)',
-
                 'food_label': 'Блюда',
                 'deliv_label': 'Доставка',
+                'order_btn': 'ОФОРМИТЬ ЗАКАЗ',
                 'confirm_btn': 'ПОДТВЕРДИТЬ',
+                'promo_placeholder': 'Промокод (необязательно)',
                 'cats': {
                     "🌯 Lavash": "🌯 Лаваш", "🍔 Burger": "🍔 Бургер", "🥙 Doner": "🥙 Донер",
                     "🍗 KFC": "🍗 KFC", "🌭 Xot-dog": "🌭 Хот-дог", "🥪 Xaggi": "🥪 Хагги",
@@ -274,23 +257,20 @@
                     "🔥 Specials": "🔥 Акции", "🥫 Souslar": "🥫 Соусы"
                 }
             },
-            'en': {
-                'delivery': 'Premium Delivery',
+            en: {
                 'search_placeholder': 'What are we looking for? 🔎',
                 'top_choice': 'TOP CHOICE',
                 'featured_title': 'What shall we eat today?',
                 'featured_sub': 'All ingredients are 100% natural!',
                 'not_found': 'Nothing found... ☕️',
                 'cart_title': 'Cart',
-                'cart_sub': 'Your selected delicious items',
+                'cart_sub': 'Your selected items',
                 'cart_empty': 'Your cart is empty 🛒',
-                'total_label': 'Total amount',
-                'order_btn': 'PLACE ORDER',
-                'promo_placeholder': 'Promo code (optional)',
-
                 'food_label': 'Food',
                 'deliv_label': 'Delivery',
+                'order_btn': 'PLACE ORDER',
                 'confirm_btn': 'CONFIRM',
+                'promo_placeholder': 'Promo code (optional)',
                 'cats': {
                     "🌯 Lavash": "🌯 Lavash", "🍔 Burger": "🍔 Burger", "🥙 Doner": "🥙 Doner",
                     "🍗 KFC": "🍗 KFC", "🌭 Xot-dog": "🌭 Hot-dog", "🥪 Xaggi": "🥪 Haggi",
@@ -302,110 +282,46 @@
             }
         };
 
-        const S = LANG_STRINGS[CURRENT_LANG] || LANG_STRINGS['uz'];
-
         const ITEM_NAMES = {
-            uz: {
-                // Menu data is authored in Uzbek; mapping is optional here.
-            },
             ru: {
-                "Standart": "Стандарт",
-                "Pishloqli": "С сыром",
-                "Big": "Большой",
-                "Big pishloq": "Большой с сыром",
-                "Big (45sm)": "Большой (45 см)",
-                "Canada (45sm)": "Канада (45 см)",
-                "Super (45sm)": "Супер (45 см)",
-                "Chiz": "Сырный",
-                "Gamburger": "Гамбургер",
-                "Chizburger": "Чизбургер",
-                "Double": "Дабл",
-                "Double chiz": "Дабл чиз",
-                "Go'shtli": "С мясом",
-                "Pishloqli tovuq": "Сырная курица",
-                "Nuggets": "Наггетсы",
-                "Nuggets mini": "Наггетсы мини",
-                "File strips": "Стрипсы",
-                "Qanot": "Крылышки",
-                "Kartoshka": "Картошка фри",
-                "Lunch box": "Ланч-бокс",
-                "Mini": "Мини",
-                "Twins": "Твинс",
-                "Sous": "Соус",
-                "Yostiqchalar": "Подушечки",
-                "Yostiqchalar mini": "Подушечки мини",
-                "Choy": "Чай",
-                "Choy mevali": "Фруктовый чай",
-                "O'rmon mevalari": "Лесные ягоды",
-                "Ko'k": "Синий",
-                "Kofe": "Кофе",
-                "Kofe (Big)": "Кофе (большой)",
-                "Moxito": "Мохито",
-                "Tropic": "Тропик",
-                "Xot let": "Горячий латте",
-                "Kfc xaggi": "KFC Хагги",
-                "Kfc BURGER (+0.25 Cola)": "KFC BURGER (+0.25 Cola)",
-                "Kfc HAGGI (+0.25 Cola)": "KFC HAGGI (+0.25 Cola)"
+                "Standart": "Стандарт", "Pishloqli": "С сыром", "Big": "Большой", "Big pishloq": "Большой с сыром",
+                "Big (45sm)": "Большой (45 см)", "Canada (45sm)": "Канада (45 см)", "Super (45sm)": "Супер (45 см)",
+                "Chiz": "Сырный", "Gamburger": "Гамбургер", "Chizburger": "Чизбургер", "Double": "Дабл",
+                "Double chiz": "Дабл чиз", "Go'shtli": "С мясом", "Pishloqli tovuq": "Сырная курица",
+                "Nuggets": "Наггетсы", "Nuggets mini": "Наггетсы мини", "File strips": "Стрипсы",
+                "Qanot": "Крылышки", "Kartoshka": "Картошка фри", "Lunch box": "Ланч-бокс", "Mini": "Мини",
+                "Twins": "Твинс", "Sous": "Соус", "Yostiqchalar": "Подушечки", "Yostiqchalar mini": "Подушечки мини",
+                "Choy": "Чай", "Choy mevali": "Фруктовый чай", "O'rmon mevalari": "Лесные ягоды", "Ko'k": "Синий",
+                "Kofe": "Кофе", "Kofe (Big)": "Кофе (большой)", "Moxito": "Мохито", "Tropic": "Тропик",
+                "Xot let": "Горячий латте", "Kfc xaggi": "KFC Хагги", "Kfc BURGER (+0.25 Cola)": "KFC БУРГЕР (+0.25 Кола)",
+                "Kfc HAGGI (+0.25 Cola)": "KFC ХАГГИ (+0.25 Кола)"
             },
             en: {
-                "Standart": "Standard",
-                "Pishloqli": "Cheese",
-                "Big": "Big",
-                "Big pishloq": "Big cheese",
-                "Big (45sm)": "Big (45 cm)",
-                "Canada (45sm)": "Canada (45 cm)",
-                "Super (45sm)": "Super (45 cm)",
-                "Chiz": "Cheese",
-                "Gamburger": "Hamburger",
-                "Chizburger": "Cheeseburger",
-                "Double": "Double",
-                "Double chiz": "Double cheese",
-                "Go'shtli": "Meat",
-                "Pishloqli tovuq": "Cheesy chicken",
-                "Nuggets": "Nuggets",
-                "Nuggets mini": "Nuggets mini",
-                "File strips": "Fillet strips",
-                "Qanot": "Wings",
-                "Kartoshka": "Fries",
-                "Lunch box": "Lunch box",
-                "Mini": "Mini",
-                "Twins": "Twins",
-                "Sous": "Sauce",
-                "Yostiqchalar": "Cheese pillows",
-                "Yostiqchalar mini": "Mini cheese pillows",
-                "Choy": "Tea",
-                "Choy mevali": "Fruit tea",
-                "O'rmon mevalari": "Forest berries",
-                "Ko'k": "Blue",
-                "Kofe": "Coffee",
-                "Kofe (Big)": "Coffee (Large)",
-                "Moxito": "Mojito",
-                "Tropic": "Tropical",
-                "Xot let": "Hot latte",
-                "Kfc xaggi": "KFC Haggi",
-                "Kfc BURGER (+0.25 Cola)": "KFC BURGER (+0.25 Cola)",
+                "Standart": "Standard", "Pishloqli": "Cheese", "Big": "Big", "Big pishloq": "Big cheese",
+                "Big (45sm)": "Big (45 cm)", "Canada (45sm)": "Canada (45 cm)", "Super (45sm)": "Super (45 cm)",
+                "Chiz": "Cheese", "Gamburger": "Hamburger", "Chizburger": "Cheeseburger", "Double": "Double",
+                "Double chiz": "Double cheese", "Go'shtli": "Meat", "Pishloqli tovuq": "Cheesy chicken",
+                "Nuggets": "Nuggets", "Nuggets mini": "Nuggets mini", "File strips": "Fillet strips",
+                "Qanot": "Wings", "Kartoshka": "Fries", "Lunch box": "Lunch box", "Mini": "Mini",
+                "Twins": "Twins", "Sous": "Sauce", "Yostiqchalar": "Cheese pillows", "Yostiqchalar mini": "Mini cheese pillows",
+                "Choy": "Tea", "Choy mevali": "Fruit tea", "O'rmon mevalari": "Forest berries", "Ko'k": "Blue",
+                "Kofe": "Coffee", "Kofe (Big)": "Coffee (Large)", "Moxito": "Mojito", "Tropic": "Tropical",
+                "Xot let": "Hot latte", "Kfc xaggi": "KFC Haggi", "Kfc BURGER (+0.25 Cola)": "KFC BURGER (+0.25 Cola)",
                 "Kfc HAGGI (+0.25 Cola)": "KFC HAGGI (+0.25 Cola)"
             }
         };
-        // Apply Static Translations
+
+        const S = LANG_STRINGS[CURRENT_LANG] || LANG_STRINGS['uz'];
+
+        // Apply translations to static elements
         document.getElementById('search-input').placeholder = S.search_placeholder;
-        document.querySelector('.bg-red-600.text-white.text-\\[10px\\]').innerText = S.top_choice;
-        document.querySelector('h2.text-white.text-2xl').innerText = S.featured_title;
-        document.querySelector('p.text-white\\/60').innerText = S.featured_sub;
-        document.querySelector('#cart-sheet h2').innerText = S.cart_title;
-        document.querySelector('#cart-sheet p.text-gray-400').innerText = S.cart_sub;
-        document.querySelector('#checkout-btn span').innerText = S.order_btn;
+        document.getElementById('top-choice-label').innerText = S.top_choice;
+        document.getElementById('featured-title').innerText = S.featured_title;
+        document.getElementById('featured-sub').innerText = S.featured_sub;
+        document.getElementById('cart-title').innerText = S.cart_title;
+        document.getElementById('cart-sub').innerText = S.cart_sub;
+        document.getElementById('checkout-btn').querySelector('span').innerText = S.order_btn;
         document.getElementById('promo-input').placeholder = S.promo_placeholder;
-
-
-        tg.expand();
-        tg.ready();
-
-        if (tg.colorScheme === 'dark') {
-            document.documentElement.classList.add('dark');
-            tg.setHeaderColor('#0f0f0f');
-            tg.setBackgroundColor('#0c0c0c');
-        }
 
         const MENU_DATA = {
             "🌯 Lavash": [
@@ -484,15 +400,20 @@
             ]
         };
 
-        let cart = [];
-        let activeCategory = Object.keys(MENU_DATA)[0];
-        let idCounter = 1;
+        function translate(key, type = 'item') {
+            if (type === 'cat') return S.cats[key] || key;
+            const dict = ITEM_NAMES[CURRENT_LANG] || {};
+            const cleanKey = String(key).trim();
+            return dict[cleanKey] || cleanKey;
+        }
 
+        let cart = [];
+        let idCounter = 1;
         const FLAT_ITEMS = [];
+
         Object.keys(MENU_DATA).forEach(cat => {
             MENU_DATA[cat].forEach(item => {
-                const translatedName = (ITEM_NAMES[CURRENT_LANG] && ITEM_NAMES[CURRENT_LANG][item.n]) || item.n;
-                FLAT_ITEMS.push({ id: idCounter++, raw_name: item.n, name: translatedName, price: item.p, image: item.i, cat: cat });
+                FLAT_ITEMS.push({ id: idCounter++, raw_name: item.n, price: item.p, image: item.i, cat });
             });
         });
 
@@ -502,8 +423,8 @@
                 const safeId = cat.replace(/[^a-zA-Z0-9]/g, '');
                 return `
                     <button id="nav-${safeId}" onclick="selectCategory('${cat}')" 
-                        class="category-btn whitespace-nowrap px-8 py-3.5 rounded-3xl text-sm font-black tracking-tight transition-all snap-start bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-500">
-                        ${S.cats[cat] || cat}
+                        class="category-btn whitespace-nowrap px-8 py-3.5 rounded-3xl text-sm font-black tracking-tight transition-all bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-500">
+                        ${translate(cat, 'cat')}
                     </button>
                 `;
             }).join('');
@@ -511,19 +432,13 @@
 
         function renderMenu(searchTerm = "") {
             const container = document.getElementById('menu-sections');
-
             if (searchTerm) {
-                const filtered = FLAT_ITEMS.filter(i => i.name.toLowerCase().includes(searchTerm.toLowerCase()));
-                container.innerHTML = `
-                    <div class="px-6 grid grid-cols-2 gap-4">
-                        ${filtered.map(item => renderProductCard(item)).join('')}
-                    </div>
-                `;
+                const filtered = FLAT_ITEMS.filter(i => translate(i.raw_name).toLowerCase().includes(searchTerm.toLowerCase()));
+                container.innerHTML = `<div class="px-6 grid grid-cols-2 gap-4">${filtered.map(item => renderProductCard(item)).join('')}</div>`;
                 if (!filtered.length) container.innerHTML = `<div class="py-20 text-center text-gray-400 font-bold">${S.not_found}</div>`;
                 return;
             }
 
-            // Continuous vertical flow of all categories
             container.innerHTML = Object.keys(MENU_DATA).map(cat => {
                 const safeId = cat.replace(/[^a-zA-Z0-9]/g, '');
                 return `
@@ -531,7 +446,7 @@
                         <div class="px-6 mb-4">
                             <h2 class="text-xl font-black tracking-tighter text-gray-900 dark:text-white flex items-center gap-2">
                                 <span class="w-1 h-6 bg-red-600 rounded-full"></span>
-                                ${S.cats[cat] || cat}
+                                ${translate(cat, 'cat')}
                             </h2>
                         </div>
                         <div class="px-6 grid grid-cols-2 gap-3">
@@ -540,35 +455,27 @@
                     </div>
                 `;
             }).join('');
-
-            setTimeout(initScrollSpy, 100);
-        }
-
+            setTimeout(initScrollSpy, 100)
         function renderProductCard(item) {
-            const baseName = item.raw_name || item.n || item.name;
-            const keyName = (baseName ? String(baseName).trim() : baseName);
-            const name = (ITEM_NAMES[CURRENT_LANG] && ITEM_NAMES[CURRENT_LANG][keyName]) || item.name || keyName;
+            const rawName = item.raw_name || item.n;
+            const name = translate(rawName);
             const price = item.p || item.price;
             const img = item.i || item.image;
             return `
-                <div class="product-card bg-white dark:bg-[#1a1a1a] rounded-[45px] p-3 shadow-xl shadow-black/5 flex flex-col justify-between w-full">
+                <div class="product-card bg-white dark:bg-[#1a1a1a] rounded-[45px] p-3 shadow-xl shadow-black/5 flex flex-col justify-between w-full h-full">
                     <div class="relative w-full aspect-square bg-gray-50 dark:bg-zinc-800 rounded-[38px] overflow-hidden">
-                        <img src="${img}" 
-                             onerror="this.onerror=null; this.src='images/burger.png';" 
-                             class="w-full h-full object-cover image-zoom">
-                        <button onclick="addToCartByName('${name}', ${price}, '${img}')" 
-                                class="absolute bottom-2 right-2 w-9 h-9 price-tag rounded-full shadow-md shadow-red-500/30 flex items-center justify-center text-white active:scale-90 transition-all hover:scale-110">
+                        <img src="${img}" onerror="this.onerror=null; this.src='images/burger.png';" class="w-full h-full object-cover image-zoom">
+                        <button onclick="addToCartByName('${name.replace(/'/g, "\\'")}', ${price}, '${img}')" class="absolute bottom-2 right-2 w-9 h-9 price-tag rounded-full shadow-md shadow-red-500/30 flex items-center justify-center text-white active:scale-90 transition-all hover:scale-110">
                             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
                         </button>
                     </div>
                     <div class="px-4 py-5">
                         <h3 class="font-black text-[12px] leading-tight tracking-tight text-gray-800 dark:text-zinc-100 line-clamp-2 h-8">${name}</h3>
-                        <p class="text-red-500 font-extrabold text-[15px] mt-1 tracking-tighter">${price.toLocaleString()} so'm</p>
+                        <p class="text-red-500 font-extrabold text-[15px] mt-1 tracking-tighter">${price.toLocaleSt</p>
                     </div>
                 </div>
             `;
         }
-
 
         window.addToCartByName = (name, price, image) => {
             const inCart = cart.find(i => i.name === name);
@@ -579,21 +486,15 @@
         }
 
         let isScrollingByClick = false;
-
         window.selectCategory = (cat) => {
             isScrollingByClick = true;
-            activeCategory = cat;
             updateActiveCategoryUI(cat);
-
             const safeId = cat.replace(/[^a-zA-Z0-9]/g, '');
-            const element = document.getElementById(`section-${safeId}`);
-            if (element) {
-                const headerOffset = 140;
-                const elementPosition = element.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+            const el = document.getElementById(`section-${safeId}`);
+            if (el) {
+                const y = el.getBoundingClientRect().top + window.pageYOffset - 140;
+                window.scrollTo({ top: y, behavior: "smooth" });
             }
-
             setTimeout(() => { isScrollingByClick = false; }, 800);
             if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
@@ -614,125 +515,99 @@
 
         function initScrollSpy() {
             const sections = document.querySelectorAll('.menu-section');
-            const options = {
-                root: null,
-                rootMargin: '-150px 0px -70% 0px',
-                threshold: 0
-            };
-
             const observer = new IntersectionObserver((entries) => {
                 if (isScrollingByClick) return;
                 entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const cat = entry.target.getAttribute('data-category');
-                        updateActiveCategoryUI(cat);
-                    }
+                    if (entry.isIntersecting) updateActiveCategoryUI(entry.target.getAttribute('data-category'));
                 });
-            }, options);
-
-            sections.forEach(section => observer.observe(section));
+            }, { rootMargin: '-150px 0px -70% 0px' });
+            sections.forEach(s => observer.observe(s));
         }
-
 
         function updateCartUI() {
             const count = cart.reduce((sum, i) => sum + i.quantity, 0);
             const countEl = document.getElementById('cart-count');
-            if (count > 0) { countEl.innerText = count; countEl.classList.remove('hidden'); tg.MainButton.setText(`${S.confirm_btn} (${count})`); tg.MainButton.show(); tg.MainButton.setParams({ color: '#dc2626', text_color: '#ffffff' }); }
-            else { countEl.classList.add('hidden'); tg.MainButton.hide(); }
+            if (count > 0) {
+                countEl.innerText = count; countEl.classList.remove('hidden');
+                tg.MainButton.setText(`${S.confirm_btn} (${count})`); tg.MainButton.show();
+                tg.MainButton.setParams({ color: '#dc2626', text_color: '#ffffff' });
+            } else { countEl.classList.add('hidden'); tg.MainButton.hide(); }
         }
 
-        const modal = document.getElementById('cart-modal');
-        const sheet = document.getElementById('cart-sheet');
-        const overlay = document.getElementById('cart-overlay');
-
-        function openCart() {
-            modal.classList.remove('hidden');
-            setTimeout(() => { overlay.style.opacity = "1"; sheet.classList.remove('translate-y-full'); }, 10);
-            renderCartItems();
-        }
-
-        function closeCart() {
-            overlay.style.opacity = "0"; sheet.classList.add('translate-y-full');
-            setTimeout(() => modal.classList.add('hidden'), 500);
-        }
-
+        const modal = document.getElementById('cart-modal'), sheet = document.getElementById('cart-sheet'), overlay = document.getElementById('cart-overlay');
+        function openCart() { modal.classList.remove('hidden'); setTimeout(() => { overlay.style.opacity = "1"; sheet.classList.remove('translate-y-full'); }, 10); renderCartItems(); }
+        function closeCart() { overlay.style.opacity = "0"; sheet.classList.add('translate-y-full'); setTimeout(() => modal.classList.add('hidden'), 500); }
+        
         function renderCartItems() {
             const container = document.getElementById('cart-items');
             let total = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-            if (cart.length === 0) { container.innerHTML = `< div class="py-10 text-center text-gray-400 font-bold tracking-tight" > ${S.cart_empty}</div > `; }
+            if (cart.length === 0) { container.innerHTML = `<div class="py-10 text-center text-gray-400 font-bold">${S.cart_empty}</div>`; }
             else {
                 container.innerHTML = cart.map(item => `
-                    < div class="flex items-center gap-5 animate-item" >
-                        <div class="w-20 h-20 rounded-[28px] bg-gray-50 flex-shrink-0 overflow-hidden shadow-sm">
-                            <img src="${item.image}" 
-                                 onerror="this.onerror=null; this.src='images/burger.png';"
-                                 class="w-full h-full object-cover">
+                    <div class="flex items-center gap-5 animate-item">
+                        <div class="w-16 h-16 rounded-2xl bg-gray-50 overflow-hidden shrink-0"><img src="${item.image}" class="w-full h-full object-cover"></div>
+                        <div class="grow"><h4 class="font-bold text-sm leading-tight">${item.name}</h4><p class="text-red-500 font-black text-xs mt-1">${item.price.toLocaleString()} so'm</p></div>
+                        <div class="flex items-center gap-3 bg-gray-100 dark:bg-zinc-800 rounded-2xl p-1">
+                            <button onclick="changeQty(${item.id}, -1)" class="w-7 h-7 rounded-xl bg-white dark:bg-zinc-700 shadow-sm flex items-center justify-center font-bold">-</button>
+                            <span class="text-xs font-bold w-4 text-center">${item.quantity}</span>
+                            <button onclick="changeQty(${item.id}, 1)" class="w-7 h-7 rounded-xl bg-white dark:bg-zinc-700 shadow-sm flex items-center justify-center font-bold">+</button>
                         </div>
-                        <div class="flex-grow"><h4 class="font-black text-base tracking-tighter">${item.name}</h4><p class="text-red-500 font-extrabold text-sm mt-1">${item.price.toLocaleString()} so'm</p></div>
-                        <div class="flex items-center gap-4 bg-gray-100 dark:bg-zinc-800 rounded-3xl p-2">
-                            <button onclick="changeQty(${item.id}, -1)" class="w-8 h-8 rounded-2xl bg-white dark:bg-zinc-700 shadow-md flex items-center justify-center font-black">-</button>
-                            <span class="text-sm font-black w-4 text-center">${item.quantity}</span>
-                            <button onclick="changeQty(${item.id}, 1)" class="w-8 h-8 rounded-2xl bg-white dark:bg-zinc-700 shadow-md flex items-center justify-center font-black">+</button>
-                        </div>
-                    </div >
-                    `).join('');
+                  </iv>
+               `).join('');
             }
-            const deliveryFee = 15000;
-            const finalTotal = total > 0 ? total + deliveryFee : 0;
-            document.getElementById('cart-total').innerHTML = `< div class="text-right" ><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">${S.food_label}: ${total.toLocaleString()} so'm</p><p class="text-[10px] text-red-500 font-bold uppercase tracking-widest mb-2">${S.deliv_label}: ${deliveryFee.toLocaleString()} so'm</p><p class="text-4xl font-black tracking-tighter text-red-600">${finalTotal.toLocaleString()} so'm</p></div >`;
+            const deliveryFee = 15000, finalTotal = total > 0 ? total + deliveryFee : 0;
+            document.getElementById('cart-total').innerHTML = `<div class="text-right">
+                <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">${S.food_label}: ${total.toLocaleString()} so'm</p>
+                <p class="text-[10px] text-red-500 font-bold uppercase mb-2">${S.deliv_label}: ${deliveryFee.toLocaleString()} so'm</p>
+                <p class="text-3xl font-black text-red-600">${finalTotal.toLocaleString()} so'm</p>
+            </div>`;
         }
 
-        window.changeQty = (id, delta) => { const idx = cart.findIndex(i => i.id === id); cart[idx].quantity += delta; if (cart[idx].quantity <= 0) cart.splice(idx, 1); renderCartItems(); updateCartUI(); if (cart.length === 0) closeCart(); if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
+        window.changeQty = (id, delta) => { 
+            const idx = cart.findIndex(i => i.id === id); 
+            cart[idx].quantity += delta; 
+            if (cart[idx].quantity <= 0) cart.splice(idx, 1); 
+            renderCartItems(); updateCartUI(); 
+            if (cart.length === 0) closeCart();
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); 
+        }
+
         document.getElementById('cart-btn').onclick = openCart;
         overlay.onclick = closeCart;
-        document.getElementById('clear-cart').onclick = () => { cart = []; updateCartUI(); closeCart(); };
+       document.geElementById('clear-cart').onclick = () => { cart = []; updateCartUI(); closeCart(); };
         document.getElementById('checkout-btn').onclick = () => {
             const total = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-            const deliveryFee = 15000;
             const promo = document.getElementById('promo-input').value.trim();
-
-            const payload = {
-                type: 'order',
-                items: cart,
-                total: (total + deliveryFee),
-                promo_code: promo || null
-            };
-
-            const send = () => {
-                tg.sendData(JSON.stringify(payload));
-                tg.close();
-            };
-
-            // Try to attach GPS automatically (requires user permission)
-            try {
-                const cached = localStorage.getItem('yummy_last_geo');
-                if (cached) payload.location = JSON.parse(cached);
-            } catch (e) { }
-
+            const payload = { type: 'order', items: cart, total: (total + 15000), promo_code: promo || null };
+            
+            const send = () => { tg.sendData(JSON.stringify(payload)); tg.close(); };
+            try { const cached = localStorage.getItem('yummy_last_geo'); if (cached) payload.location = JSON.parse(cached); } catch (e) { }
             if (!navigator.geolocation) return send();
-
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
-                    payload.location = {
-                        lat: pos.coords.latitude,
-                        lon: pos.coords.longitude,
-                        accuracy: pos.coords.accuracy,
-                        ts: Date.now()
-                    };
+                    payload.location = { lat: pos.coords.latitude, lon: pos.coords.longitude, accuracy: pos.coords.accuracy, ts: Date.now() };
                     try { localStorage.setItem('yummy_last_geo', JSON.stringify(payload.location)); } catch (e) { }
                     send();
-                },
-                () => send(),
-                { enableHighAccuracy: true, timeout: 4000, maximumAge: 600000 }
+                }, () => send(), { enableHighAccuracy: true, timeout: 4000 }
             );
         };
 
         tg.onEvent('mainButtonClicked', openCart);
-        const toggle = document.getElementById('search-toggle');
-        const box = document.getElementById('search-container');
-        const input = document.getElementById('search-input');
-        toggle.onclick = () => { box.classList.toggle('hidden'); if (!box.classList.contains('hidden')) input.focus(); }
-        input.oninput = (e) => renderMenu(e.target.value);
+        document.getElementById('search-toggle').onclick = () => { 
+            const box = document.getElementById('search-container'); 
+            box.classList.toggle('hidden'); 
+            if (!box.classList.contains('hidden')) document.getElementById('search-input').focus(); 
+        }
+        document.getElementById('search-input').oninput = (e) => renderMenu(e.target.value);
+        
+        tg.expand();
+        tg.ready();
+        if (tg.colorScheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            tg.setHeaderColor('#0f0f0f');
+            tg.setBackgroundColor('#0c0c0c');
+        }
+
         renderCategories();
         renderMenu();
     </script>
