@@ -114,6 +114,63 @@
                 transform: translateY(0);
             }
         }
+
+        .promo-card {
+            position: relative;
+            border-radius: 38px;
+            overflow: hidden;
+            min-height: 320px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: #000;
+            box-shadow: 0 25px 45px -35px rgba(0, 0, 0, 0.6);
+        }
+
+        .promo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.7s cubic-bezier(0.2, 0, 0.2, 1);
+        }
+
+        .promo-card:hover img {
+            transform: scale(1.03);
+        }
+
+        .promo-card-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.5rem;
+            background: linear-gradient(180deg, rgba(12, 12, 12, 0.08), rgba(12, 12, 12, 0.9));
+        }
+
+        .promo-card-badge {
+            font-size: 10px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            font-weight: 900;
+            border-radius: 999px;
+            padding: 0.25rem 1rem;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .promo-card-price {
+            font-size: 2.2rem;
+            line-height: 1;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .promo-card-secondary {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
     </style>
 </head>
 
@@ -151,19 +208,18 @@
 
     <!-- Featured -->
     <section class="mt-28 px-6">
-        <div class="relative w-full h-52 rounded-[45px] overflow-hidden shadow-2xl group">
-            <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1000&fit=crop"
-                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
-            <div
-                class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-8 flex flex-col justify-end">
-                <span id="top-choice-label"
-                    class="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full w-fit mb-3 tracking-widest uppercase">TOP
-                    CHOICE</span>
-                <h2 id="featured-title" class="text-white text-2xl font-black tracking-tight">What shall we eat today?
-                </h2>
-                <p id="featured-sub" class="text-white/60 text-xs font-bold mt-1">100% natural and delicious!</p>
-            </div>
+        <div class="flex flex-col gap-2">
+            <span id="top-choice-label"
+                class="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full w-fit tracking-widest uppercase inline-block">TOP
+                CHOICE</span>
+            <h2 id="featured-title"
+                class="text-3xl font-black tracking-tight text-gray-900 dark:text-white leading-snug">
+                What shall we eat today?
+            </h2>
+            <p id="featured-sub" class="text-gray-600 dark:text-gray-200 text-sm font-bold">All ingredients are 100%
+                natural!</p>
         </div>
+        <div id="promo-grid" class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2"></div>
     </section>
 
     <!-- Categories -->
@@ -318,6 +374,29 @@
             }
         };
 
+        const PROMO_ITEMS = [
+            {
+                id: 'promo_kfc_combo',
+                name: 'Kfc BURGER',
+                price: 33000,
+                image: 'images/image2/kfc_burger.png',
+                badge: '0.25 Cola Bonus',
+                label: 'Kfc BURGER',
+                subtext: "Kfc HAGGI ? 37 000 so'm",
+                secondary: "0.25 Cola bilan to'ldirilgan combo"
+            },
+            {
+                id: 'promo_mazza',
+                name: 'MAZZA',
+                price: 30000,
+                image: 'images/mazza.png',
+                badge: 'Yangilik',
+                label: 'MAZZA',
+                subtext: "Katta 30 000 / Mini 15 000 so'm",
+                secondary: "Yangi ta'm va sabzavotli elementlar"
+            }
+        ];
+
         const S = LANG_STRINGS[CURRENT_LANG] || LANG_STRINGS['uz'];
 
         // Apply translations to static elements
@@ -407,6 +486,25 @@
             ]
         };
 
+        // --- DYNAMIC DATA INTEGRATION ---
+        if (window.DYNAMIC_MENU_DATA) {
+            // Apply dynamic menu data
+            Object.assign(MENU_DATA, window.DYNAMIC_MENU_DATA);
+
+            // Apply dynamic translations
+            if (window.DYNAMIC_CATS) {
+                if (window.DYNAMIC_CATS.uz) Object.assign(LANG_STRINGS.uz.cats, window.DYNAMIC_CATS.uz);
+                if (window.DYNAMIC_CATS.ru) Object.assign(LANG_STRINGS.ru.cats, window.DYNAMIC_CATS.ru);
+                if (window.DYNAMIC_CATS.en) Object.assign(LANG_STRINGS.en.cats, window.DYNAMIC_CATS.en);
+            }
+
+            // Clear items not in dynamic data (optional, but effectively we act as if MENU_DATA is the source)
+            // Ideally we would replace MENU_DATA entirely:
+            Object.keys(MENU_DATA).forEach(key => delete MENU_DATA[key]);
+            Object.assign(MENU_DATA, window.DYNAMIC_MENU_DATA);
+        }
+        // -------------------------------
+
         function translate(key, type = 'item') {
             if (type === 'cat') return S.cats[key] || key;
             const dict = ITEM_NAMES[CURRENT_LANG] || {};
@@ -471,7 +569,7 @@
             paginationMode = true;
             currentCategoryIndex = 0;
             container.innerHTML = '';
-            
+
             // Load all categories at once
             for (let i = 0; i < CATEGORIES.length; i++) {
                 const cat = CATEGORIES[i];
@@ -479,7 +577,7 @@
                 container.innerHTML += html;
             }
             currentCategoryIndex = CATEGORIES.length;
-            
+
             setTimeout(initScrollSpy, 100);
         }
 
@@ -510,6 +608,39 @@
             `;
         }
 
+        function renderPromoCard(item) {
+            const priceText = item.price ? item.price.toLocaleString() + " so'm" : '';
+            return `
+                <div class="promo-card" onclick="handlePromoClick('${item.id}')">
+                    <img src="${item.image}" alt="${item.name}">
+                    <div class="promo-card-overlay">
+                        <div>
+                            <span class="promo-card-badge">${item.badge}</span>
+                        </div>
+                        <div>
+                            <p class="text-white text-2xl font-black mb-1">${item.label}</p>
+                            <p class="promo-card-price">${priceText}</p>
+                            <p class="promo-card-secondary">${item.subtext}</p>
+                            <p class="promo-card-secondary">${item.secondary}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPromoGrid() {
+            const container = document.getElementById('promo-grid');
+            if (!container) return;
+            container.innerHTML = PROMO_ITEMS.map(item => renderPromoCard(item)).join('');
+        }
+
+        window.handlePromoClick = (promoId) => {
+            const promo = PROMO_ITEMS.find(item => item.id === promoId);
+            if (!promo) return;
+            addToCartByName(promo.label, promo.price, promo.image);
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        };
+
         window.addToCartByName = (name, price, image) => {
             const inCart = cart.find(i => i.name === name);
             if (inCart) inCart.quantity += 1;
@@ -528,7 +659,7 @@
                 const y = el.getBoundingClientRect().top + window.pageYOffset - 140;
                 window.scrollTo({ top: y, behavior: "smooth" });
             }
-            setTimeout(() => { isScrollingByClick = false; }, 800);
+            meout(() => { isScrollingByClick = false; }, 800);
             if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
 
@@ -551,17 +682,20 @@
             const observer = new IntersectionObserver((entries) => {
                 if (isScrollingByClick) return;
                 entries.forEach(entry => {
-                    if (entry.isIntersecting) updateActiveCategoryUI(entry.target.getAttribute('data-category'));
+                    if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
+                        updateActiveCategoryUI(entry.target.getAttribute('data-category'));
+                    }
                 });
-            }, { rootMargin: '-150px 0px -70% 0px' });
+            }, { rootMargin: '-100px 0px -60% 0px' });
             sections.forEach(s => observer.observe(s));
         }
 
         const HEADER_OFFSET = 140;
-        const AUTO_SCROLL_THRESHOLD = 80;
+        const AUTO_SCROLL_THRESHOLD = 150;
         let autoLastScrollY = window.scrollY;
         let autoScrollTimer = null;
         let autoScrolling = false;
+        let lastAutoAdvanceTime = 0;
 
         function getNearestSection() {
             const sections = Array.from(document.querySelectorAll('.menu-section'));
@@ -581,11 +715,14 @@
             autoScrolling = true;
             const y = section.offsetTop - HEADER_OFFSET;
             window.scrollTo({ top: y, behavior: 'smooth' });
-            setTimeout(() => { autoScrolling = false; }, 600);
+            setTimeout(() => { autoScrolling = false; }, 700);
         }
 
         function autoAdvanceIfNeeded() {
             if (isScrollingByClick || autoScrolling) return;
+            const now = Date.now();
+            if (now - lastAutoAdvanceTime < 1000) return;
+
             const dirDown = window.scrollY > autoLastScrollY;
             autoLastScrollY = window.scrollY;
             if (!dirDown) return;
@@ -595,37 +732,63 @@
 
             const bottomPosition = current.offsetTop + current.offsetHeight;
             const viewportBottom = window.scrollY + window.innerHeight;
+
             if (viewportBottom < bottomPosition - AUTO_SCROLL_THRESHOLD) return;
 
             const sections = Array.from(document.querySelectorAll('.menu-section'));
             const idx = sections.indexOf(current);
-            const next = idx >= 0 ? sections[idx + 1] : null;
-            if (next) scrollToSection(next);
+            const next = idx >= 0 && idx < sections.length - 1 ? sections[idx + 1] : null;
+
+            if (next) {
+                lastAutoAdvanceTime = now;
+                scrollToSection(next);
+            }
         }
 
         window.addEventListener('scroll', () => {
             clearTimeout(autoScrollTimer);
-            autoScrollTimer = setTimeout(autoAdvanceIfNeeded, 130);
+            autoScrollTimer = setTimeout(autoAdvanceIfNeeded, 200);
         }, { passive: true });
 
         function updateCartUI() {
             const count = cart.reduce((sum, i) => sum + i.quantity, 0);
             const countEl = document.getElementById('cart-count');
             if (count > 0) {
-                countEl.innerText = count; countEl.classList.remove('hidden');
-                tg.MainButton.setText(`${S.confirm_btn} (${count})`); tg.MainButton.show();
+                countEl.innerText = count;
+                countEl.classList.remove('hidden');
+                tg.MainButton.setText(`${S.confirm_btn} (${count})`);
+                tg.MainButton.show();
                 tg.MainButton.setParams({ color: '#dc2626', text_color: '#ffffff' });
-            } else { countEl.classList.add('hidden'); tg.MainButton.hide(); }
+            } else {
+                countEl.classList.add('hidden');
+                tg.MainButton.hide();
+            }
         }
 
-        const modal = document.getElementById('cart-modal'), sheet = document.getElementById('cart-sheet'), overlay = document.getElementById('cart-overlay');
-        function openCart() { modal.classList.remove('hidden'); setTimeout(() => { overlay.style.opacity = "1"; sheet.classList.remove('translate-y-full'); }, 10); renderCartItems(); }
-        function closeCart() { overlay.style.opacity = "0"; sheet.classList.add('translate-y-full'); setTimeout(() => modal.classList.add('hidden'), 500); }
+        const modal = document.getElementById('cart-modal'),
+            sheet = document.getElementById('cart-sheet'),
+            overlay = document.getElementById('cart-overlay');
+
+        function openCart() {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                overlay.style.opacity = "1";
+                sheet.classList.remove('translate-y-full');
+            }, 10);
+            renderCartItems();
+        }
+        function closeCart() {
+            overlay.style.opacity = "0";
+            sheet.classList.add('translate-y-full');
+            setTimeout(() => modal.classList.add('hidden'), 500);
+        }
 
         function renderCartItems() {
             const container = document.getElementById('cart-items');
             let total = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-            if (cart.length === 0) { container.innerHTML = `<div class="py-10 text-center text-gray-400 font-bold">${S.cart_empty}</div>`; }
+            if (cart.length === 0) {
+                container.innerHTML = `<div class="py-10 text-center text-gray-400 font-bold">${S.cart_empty}</div>`;
+            }
             else {
                 container.innerHTML = cart.map(item => `
                     <div class="flex items-center gap-5 animate-item">
@@ -637,7 +800,7 @@
                             <button onclick="changeQty(${item.id}, 1)" class="w-7 h-7 rounded-xl bg-white dark:bg-zinc-700 shadow-sm flex items-center justify-center font-bold">+</button>
                         </div>
                     </div>
-               `).join('');
+                `).join('');
             }
             const deliveryFee = 15000, finalTotal = total > 0 ? total + deliveryFee : 0;
             document.getElementById('cart-total').innerHTML = `<div class="text-right">
@@ -693,6 +856,7 @@
         }
 
         renderCategories();
+        renderPromoGrid();
         renderMenu();
     </script>
 </body>

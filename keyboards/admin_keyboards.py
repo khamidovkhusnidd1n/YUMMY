@@ -38,11 +38,11 @@ def admin_reply_menu(is_super=False):
     kb.append([KeyboardButton(text="🏠 Foydalanuvchi menyusi")])
     return ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
 
-def menu_manage_kb():
     kb = [
         [InlineKeyboardButton(text="➕ Yangi taom qo'shish", callback_data="admin_add_prod")],
         [InlineKeyboardButton(text="✏️ Narxlarni tahrirlash", callback_data="admin_edit_price")],
         [InlineKeyboardButton(text="🗑 Taomni o'chirish", callback_data="admin_del_prod")],
+        [InlineKeyboardButton(text="🚀 Saytga chiqarish (Update)", callback_data="admin_publish_web")],
         [InlineKeyboardButton(text="🔙 Asosiy panel", callback_data="admin_dashboard_home")]
     ]
     return InlineKeyboardMarkup(inline_keyboard=kb)
@@ -51,6 +51,7 @@ def menu_manage_reply_kb():
     kb = [
         [KeyboardButton(text="➕ Yangi taom qo'shish")],
         [KeyboardButton(text="✏️ Narxlarni tahrirlash"), KeyboardButton(text="🗑 Taomni o'chirish")],
+        [KeyboardButton(text="🚀 Saytga chiqarish (Update)")],
         [KeyboardButton(text="🔙 Asosiy panel")]
     ]
     return ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)

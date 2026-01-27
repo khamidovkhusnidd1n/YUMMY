@@ -11,6 +11,7 @@ from keyboards.admin_keyboards import (
     admin_profile_kb, menu_manage_reply_kb
 )
 import keyboards.admin_keyboards as akb
+from utils.publisher import publish_menu
 from config import SUPER_ADMINS, ALL_ADMINS, WORKERS
 from translations import STRINGS
 import os
@@ -399,6 +400,13 @@ async def admin_menu_text_access(message: types.Message):
         await message.answer("Kategoriyani tanlang (narxni o'zgartirish uchun):", reply_markup=category_list_kb(cats))
     elif "Taomni o'chirish" in text:
         await message.answer("Kategoriyani tanlang (o'chirish uchun):", reply_markup=category_list_kb(cats))
+    elif "Saytga chiqarish" in text:
+        msg = await message.answer("🚀 Sayt yangilanmoqda, iltimos kuting...")
+        success = publish_menu()
+        if success:
+            await msg.edit_text("✅ Sayt muvaffaqiyatli yangilandi! O'zgarishlar 1-2 daqiqada GitHub Pages-da ko'rinadi.")
+        else:
+            await msg.edit_text("❌ Yangilashda xatolik yuz berdi. Iltimos qaytadan urinib ko'ring.")
 
 @router.message(F.text == "🔙 Asosiy panel")
 async def admin_back_home_msg(message: types.Message):
@@ -435,6 +443,20 @@ async def admin_del_prod_start(callback: types.CallbackQuery):
     cats = db.get_all_categories()
     await callback.message.edit_text("Kategoriyani tanlang (o'chirish uchun):", reply_markup=category_list_kb(cats))
     await callback.answer()
+
+@router.callback_query(F.data == "admin_publish_web")
+async def admin_publish_web_callback(callback: types.CallbackQuery):
+    if not db.has_permission(callback.from_user.id, 'menu'):
+        return await callback.answer("Ruxsat yo'q.", show_alert=True)
+    
+    await callback.message.answer("🚀 Sayt yangilanmoqda, iltimos kuting...")
+    await callback.answer("Yangilash boshlandi...")
+    
+    success = publish_menu()
+    if success:
+        await callback.message.answer("✅ Sayt muvaffaqiyatli yangilandi! O'zgarishlar 1-2 daqiqada GitHub Pages-da ko'rinadi.")
+    else:
+        await callback.message.answer("❌ Yangilashda xatolik yuz berdi.")
 
 @router.message(AdminStates.adding_product_name)
 async def admin_add_prod_name(message: types.Message, state: FSMContext):
