@@ -16,6 +16,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="menu_data.js?v=1769524000"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="utils.js?v=1769524000"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -810,68 +811,38 @@
         }
 
         const ENHANCED_PROMO_CODES = {
-            'YUMMY10': { discount: 10, type: 'percent', minAmount: 0, maxUses: null, description: '10% off any order' },
-            'YUMMY5000': { discount: 5000, type: 'fixed', minAmount: 25000, maxUses: null, description: '5000 so\'m off orders over 25000' },
-            'WELCOME': { discount: 15, type: 'percent', minAmount: 0, maxUses: 1, description: '15% welcome bonus (first time only)', firstTimeOnly: true },
-            'FRIEND20': { discount: 20, type: 'percent', minAmount: 50000, maxUses: null, description: '20% off orders over 50000' },
-            'LUNCH50': { discount: 50, type: 'fixed', minAmount: 0, maxUses: null, description: '50 so\'m off lunch orders (11-14)' }
+            'YUMMY10': { discount: 10, type: 'percent', minAmount: 0, description: '10% off any order' },
+            'YUMMY5000': { discount: 5000, type: 'fixed', minAmount: 25000, description: '5000 so\'m off orders over 25000' },
+            'WELCOME': { discount: 15, type: 'percent', minAmount: 0, description: '15% welcome bonus', firstTimeOnly: true },
+            'FRIEND20': { discount: 20, type: 'percent', minAmount: 50000, description: '20% off orders over 50000' },
+            'LUNCH50': { discount: 50, type: 'fixed', minAmount: 0, description: '50 so\'m off lunch (11-14)' }
         };
 
         function validatePromoCode(code, total, isFirstTime = false) {
             if (!code) return { valid: false, discount: 0, message: '' };
-
             const promo = ENHANCED_PROMO_CODES[code.toUpperCase()];
             if (!promo) return { valid: false, discount: 0, message: '❌ Invalid promo code' };
-
-            // Check minimum amount
             if (total < promo.minAmount) {
-                return {
-                    valid: false,
-                    discount: 0,
-                    message: `❌ Minimum order ${promo.minAmount.toLocaleString()} so'm required`
-                };
+                return { valid: false, discount: 0, message: `❌ Minimum order ${promo.minAmount.toLocaleString()} so'm` };
             }
-
-            // Check first time only
             if (promo.firstTimeOnly && !isFirstTime) {
-                return {
-                    valid: false,
-                    discount: 0,
-                    message: '❌ This code is for first-time users only'
-                };
+                return { valid: false, discount: 0, message: '❌ First-time users only' };
             }
-
-            // Check lunch time for LUNCH50
             if (code.toUpperCase() === 'LUNCH50') {
                 const hour = new Date().getHours();
                 if (hour < 11 || hour >= 14) {
-                    return {
-                        valid: false,
-                        discount: 0,
-                        message: '❌ Lunch offer available 11:00-14:00 only'
-                    };
+                    return { valid: false, discount: 0, message: '❌ Lunch offer 11:00-14:00 only' };
                 }
             }
-
-            return {
-                valid: true,
-                ...promo,
-                message: `✅ ${promo.description}`
-            };
+            return { valid: true, ...promo, message: `✅ ${promo.description}` };
         }
 
         function calculateFinalDiscount(total, promoCode, quantityCount, isFirstTime = false) {
             const promoResult = validatePromoCode(promoCode, total, isFirstTime);
-
             let totalDiscount = 0;
-
-            // Quantity discount
             if (quantityCount >= 2) {
-                const quantityDiscount = applyQuantityDiscount(total, quantityCount);
-                totalDiscount += quantityDiscount;
+                totalDiscount += applyQuantityDiscount(total, quantityCount);
             }
-
-            // Promo code discount
             if (promoResult.valid) {
                 let promoDiscount = 0;
                 if (promoResult.type === 'percent') {
@@ -881,8 +852,16 @@
                 }
                 totalDiscount += promoDiscount;
             }
-
             return { totalDiscount, promoResult };
+        }
+
+        function calculateDeliveryFee(subtotal, distance, zone) {
+            if (subtotal >= DELIVERY_THRESHOLD) return { fee: 0, isFree: true, reason: S.delivery_free };
+            let fee = BASE_DELIVERY_FEE;
+            if (distance && distance > 3) {
+                fee += (distance - 3) * 1000;
+            }
+            return { fee: Math.round(fee), isFree: false, reason: S.delivery_fee_note };
         }
 
         const S = LANG_STRINGS[CURRENT_LANG] || LANG_STRINGS['uz'];
@@ -999,6 +978,7 @@
         }
 
         let cart = [];
+        let userData = { isFirstTime: true, totalOrders: 0 };
         let idCounter = 1;
         const FLAT_ITEMS = [];
         const CATEGORIES = Object.keys(MENU_DATA);
@@ -1339,9 +1319,6 @@
                             <span class="text-sm font-black w-6 text-center text-gray-900 dark:text-white">${item.quantity}</span>
                             <button onclick="changeQty(${item.id}, 1)" class="w-8 h-8 rounded-lg bg-white dark:bg-zinc-600 shadow-sm flex items-center justify-center font-bold text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-zinc-500 transition-colors">+</button>
                         </div>
-                        <button onclick="addToWishlist('${item.name.replace(/'/g, "\\'")}', ${item.price}, '${item.image}')" class="ml-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-600">
-                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                        </button>
                     </div>
                 `).join('');
             }
@@ -1377,7 +1354,7 @@
             document.getElementById('cart-total').innerHTML = `<div class="text-right">
                 <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">${S.food_label}: ${total.toLocaleString()} so'm</p>
                 ${discountHTML}
-                <p class="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase mb-1">${S.deliv_label}: ${deliveryConfig.fee.toLocaleString()} so'm ${deliveryConfig.isFree ? '(FREE)' : ''}</p>
+                <p class="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase mb-1">${S.deliv_label}: ${deliveryConfig.fee.toLocaleString()} so'm</p>
                 <p class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-500 mt-2">${finalTotal.toLocaleString()} so'm</p>
                 <p class="text-[10px] font-bold uppercase tracking-widest mt-2 ${total >= DELIVERY_THRESHOLD ? 'text-emerald-500' : 'text-amber-400'}">${deliveryConfig.reason}</p>
             </div>`;
@@ -1392,14 +1369,14 @@
 
         function loadCartFromStorage() {
             try {
-                const stored = localStorage.getItem('yummy_cart');
+                const stored = localStorage.getItem('yummy_cart_v2');
                 return stored ? JSON.parse(stored) : [];
             } catch (e) { return []; }
         }
 
         function saveCartToStorage(cartData) {
             try {
-                localStorage.setItem('yummy_cart', JSON.stringify(cartData));
+                localStorage.setItem('yummy_cart_v2', JSON.stringify(cartData));
             } catch (e) { }
         }
 
@@ -1409,23 +1386,19 @@
             } catch (e) { }
         }
 
-        // Load user data on init
+        // Load on init
         try {
             const storedUser = localStorage.getItem('yummy_user_data');
             if (storedUser) userData = JSON.parse(storedUser);
         } catch (e) { }
 
-        function calculateDeliveryFee(subtotal, distance, zone, optional) {
-            if (optional) return { fee: 0, isFree: true, isOptional: true, reason: 'Pickup' };
+        function calculateDeliveryFee(subtotal, distance, zone) {
             if (subtotal >= DELIVERY_THRESHOLD) return { fee: 0, isFree: true, reason: S.delivery_free };
-
             let fee = BASE_DELIVERY_FEE;
-            // Simple distance logic: +1000 sum per km over 3km
             if (distance && distance > 3) {
                 fee += (distance - 3) * 1000;
             }
-
-            return { fee: fee, isFree: false, reason: S.delivery_fee_note, distance: distance };
+            return { fee: Math.round(fee), isFree: false, reason: S.delivery_fee_note };
         }
 
         function addToWishlist(name, price, image) {
@@ -1477,30 +1450,13 @@
             const total = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
             const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
 
-            const { totalDiscount, promoResult } = calculateFinalDiscount(
-                total,
-                window.currentPromoCode || '',
-                totalItems,
-                userData.isFirstTime
-            );
-
-            const deliveryConfig = calculateDeliveryFee(
-                total - totalDiscount,
-                window.currentDistance || null,
-                window.currentZone || 'center',
-                window.makeDeliveryOptional || false
-            );
-
+            const { totalDiscount } = calculateFinalDiscount(total, window.currentPromoCode || '', totalItems, userData.isFirstTime);
+            const deliveryConfig = calculateDeliveryFee(total - totalDiscount, window.currentDistance || null);
             const finalTotal = total > 0 ? (total - totalDiscount + deliveryConfig.fee) : 0;
 
-            // Build confirmation message
-            let confirmMsg = `📋 Buyurtma tasdiqlash:\n\n`;
-            confirmMsg += `🍔 Taomlar: ${total.toLocaleString()} so'm\n`;
-            if (totalDiscount > 0) {
-                confirmMsg += `✅ Chegirma: -${totalDiscount.toLocaleString()} so'm\n`;
-            }
-            confirmMsg += `🚚 Yetkazish: ${deliveryConfig.fee.toLocaleString()} so'm\n`;
-            confirmMsg += `\n💰 Jami: ${finalTotal.toLocaleString()} so'm`;
+            let confirmMsg = `📋 Buyurtma tasdiqlash:\n\n🍔 Taomlar: ${total.toLocaleString()} so'm\n`;
+            if (totalDiscount > 0) confirmMsg += `✅ Chegirma: -${totalDiscount.toLocaleString()} so'm\n`;
+            confirmMsg += `🚚 Yetkazish: ${deliveryConfig.fee.toLocaleString()} so'm\n\n💰 Jami: ${finalTotal.toLocaleString()} so'm`;
 
             if (!confirm(confirmMsg)) return;
 
@@ -1509,35 +1465,17 @@
                 items: cart,
                 subtotal: total,
                 discount: totalDiscount,
-                discountBreakdown: {
-                    quantityDiscount: applyQuantityDiscount(total, totalItems),
-                    promoCode: window.currentPromoCode || null,
-                    promoDiscount: promoResult.valid ? (totalDiscount - applyQuantityDiscount(total, totalItems)) : 0
-                },
-                delivery: {
-                    fee: deliveryConfig.fee,
-                    zone: deliveryConfig.zone,
-                    distance: deliveryConfig.distance,
-                    isFree: deliveryConfig.isFree,
-                    isOptional: deliveryConfig.isOptional || false
-                },
+                delivery_fee: deliveryConfig.fee,
                 total: finalTotal,
-                food_total: total,
-                paymentMethod: window.selectedPaymentMethod || 'cash',
-                location: window.userLocation || null,
-                userData: {
-                    isFirstTime: userData.isFirstTime,
-                    totalOrders: userData.totalOrders + 1
-                }
+                userData: { isFirstTime: userData.isFirstTime, totalOrders: userData.totalOrders + 1 }
             };
 
             const send = () => {
                 document.getElementById('checkout-btn').disabled = true;
-                document.getElementById('checkout-btn').innerHTML = '<span>YUBORISH...</span>';
                 setTimeout(() => {
                     // Update user data
                     userData.isFirstTime = false;
-                    userData.totalOrders = (userData.totalOrders || 0) + 1;
+                    userData.totalOrders++;
                     userData.lastOrderDate = Date.now();
                     saveUserData(userData);
 
@@ -1565,7 +1503,7 @@
                         // Estimate delivery distance (simplified)
                         if (pos.coords.accuracy < 100) {
                             window.currentDistance = Math.round(pos.coords.accuracy / 1000 * 2) || 3;
-                            renderCartItems(); // Update display
+                            updateCartUI();
                         }
 
                         try {
@@ -1573,8 +1511,11 @@
                         } catch (e) { }
                         send();
                     },
-                    () => send(),
-                    { enableHighAccuracy: false, timeout: 4000, maximumAge: 300000 }
+                    (err) => {
+                        console.error("Geo error:", err);
+                        send(); // Send anyway if geo fails
+                    },
+                    { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
                 );
             } else {
                 // Try to load cached location
@@ -1586,17 +1527,55 @@
             }
         };
 
+        // ===== DARK MODE TOGGLE =====
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
+        const THEME_STORAGE_KEY = 'yummy_theme';
+        const themeIcon = document.getElementById('theme-icon');
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                htmlElement.classList.add('dark');
+                if (themeIcon) themeIcon.textContent = '☀️';
+                tg.setHeaderColor('#0f0f0f');
+                tg.setBackgroundColor('#0c0c0c');
+            } else {
+                htmlElement.classList.remove('dark');
+                if (themeIcon) themeIcon.textContent = '🌙';
+                tg.setHeaderColor('#ffffff');
+                tg.setBackgroundColor('#fcfcfc');
+            }
+        }
+
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                htmlElement.classList.toggle('dark');
+                const isDark = htmlElement.classList.contains('dark');
+                localStorage.setItem(THEME_STORAGE_KEY, isDark ? 'dark' : 'light');
+                if (themeIcon) themeIcon.textContent = isDark ? '☀️' : '🌙';
+
+                if (isDark) {
+                    tg.setHeaderColor('#0f0f0f');
+                    tg.setBackgroundColor('#0c0c0c');
+                } else {
+                    tg.setHeaderColor('#ffffff');
+                    tg.setBackgroundColor('#fcfcfc');
+                }
+
+                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            });
+        }
+
         // ===== INITIALIZE =====
+        initTheme();
         cart = loadCartFromStorage();
         if (cart.length > 0) updateCartUI();
 
         tg.expand();
         tg.ready();
-        if (tg.colorScheme === 'dark') {
-            document.documentElement.classList.add('dark');
-            tg.setHeaderColor('#0f0f0f');
-            tg.setBackgroundColor('#0c0c0c');
-        }
 
         renderCategories();
         renderPromoGrid();
