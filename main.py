@@ -1,3 +1,4 @@
+from datetime import datetime
 import asyncio
 import logging
 import sys
@@ -79,8 +80,7 @@ async def daily_report_scheduler(bot: Bot):
     while True:
         try:
             now = datetime.now()
-            # Calculate time until midnight
-            # If it's already past midnight, it will wait for the next midnight
+            # Calculate time until midnight (00:00)
             target_time = now.replace(hour=0, minute=0, second=0, microsecond=0)
             if now >= target_time:
                 from datetime import timedelta
@@ -112,11 +112,9 @@ async def daily_report_scheduler(bot: Bot):
             await asyncio.sleep(3600) # Wait an hour before retrying if error
 
 if __name__ == "__main__":
-    # Deployment timestamp: 2026-01-27 09:24 FORCE
     try:
         main()
     except KeyboardInterrupt:
         print("Bot to'xtatildi.")
-    except KeyboardInterrupt:
-        print("Bot to'xtatildi.")
+
 
