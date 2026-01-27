@@ -33,7 +33,11 @@ STRINGS = {
         'method_label': "🛒 Usul:",
         'delivery_fee_label': "(bepul)",
         'takeaway_label': "(bepul)",
-        'confirm_summary': "📊 **Buyurtmangizni tekshiring:**\n\n🍱 **Taomlar:**\n{items}\n\n🛒 **Usul:** {method}\n📍 **Manzil:** {location}\n💰 **Jami:** {total:,} so'm\n\nHamma ma'lumotlar to'g'rimi?"
+        'confirm_summary': "📊 **Buyurtmangizni tekshiring:**\n\n🍱 **Taomlar:**\n{items}\n\n🛒 **Usul:** {method}\n📍 **Manzil:** {location}\n💰 **Jami:** {total:,} so'm\n\nHamma ma'lumotlar to'g'rimi?",
+        'promo_req': "🎟 Promo kod bormi? Bo'lsa yozing, bo'lmasa pastdagi tugmani bosing:",
+        'promo_invalid': "❌ Noto'g'ri promo kod yoki muddati o'tgan.",
+        'promo_applied': "✅ Promo kod qabul qilindi! {percent}% chegirma berildi.",
+        'skip_btn': "O'tkazib yuborish ➡️"
     },
     'ru': {
         'welcome': "Добро пожаловать, {name}!\nДобро пожаловать в Yummy bot.",
@@ -69,6 +73,10 @@ STRINGS = {
         'method_label': "🛒 Способ:",
         'delivery_fee_label': "(+15,000 доставка)",
         'takeaway_label': "(без доставки)",
+        'promo_req': "🎟 Есть промокод? Если есть, введите его, если нет, нажмите кнопку ниже:",
+        'promo_invalid': "❌ Неверный промокод или истек срок действия.",
+        'promo_applied': "✅ Промокод принят! Скидка {percent}% применена.",
+        'skip_btn': "Пропустить ➡️"
     },
     'en': {
         'welcome': "Welcome {name}!\nWelcome to Yummy bot.",
@@ -93,5 +101,9 @@ STRINGS = {
         'delivery_fee_label': "(free)",
         'takeaway_label': "(free)",
         'confirm_summary': "📊 **Check your order:**\n\n🍱 **Items:**\n{items}\n\n🛒 **Method:** {method}\n📍 **Address:** {location}\n💰 **Total:** {total:,} UZS\n\nIs everything correct?",
+        'promo_req': "🎟 Do you have a promo code? If yes, type it here, otherwise press the button below:",
+        'promo_invalid': "❌ Invalid promo code or expired.",
+        'promo_applied': "✅ Promo code accepted! {percent}% discount applied.",
+        'skip_btn': "Skip ➡️"
     }
 }

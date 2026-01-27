@@ -43,11 +43,9 @@ def location_keyboard(lang='uz'):
     return ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
 
 def order_confirm_kb(lang='uz'):
+# ... existing code ...
+
+def promo_skip_kb(lang='uz'):
     s = STRINGS[lang]
-    kb = [
-        [
-            InlineKeyboardButton(text=s['confirm_btn'], callback_data="user_confirm"),
-            InlineKeyboardButton(text=s['cancel_btn'], callback_data="user_cancel")
-        ]
-    ]
+    kb = [[InlineKeyboardButton(text=s.get('skip_btn', 'Skip ➡️'), callback_data="skip_promo")]]
     return InlineKeyboardMarkup(inline_keyboard=kb)

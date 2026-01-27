@@ -33,6 +33,15 @@ class Database:
                 file_id TEXT
             )
         """)
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS promo_codes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                code TEXT UNIQUE,
+                discount_percent INTEGER,
+                is_active INTEGER DEFAULT 1,
+                expiry_date TIMESTAMP
+            )
+        """)
         self.conn.commit()
 
     def add_user(self, user_id, full_name, phone):
@@ -141,7 +150,49 @@ class Database:
                 created_at TIMESTAMP
             )
         """)
+    # --- Product Management ---
+    def add_product(self, category_id, name, price, image):
+        self.cursor.execute("INSERT INTO products (category_id, name, price, image) VALUES (?, ?, ?, ?)",
+                            (category_id, name, price, image))
         self.conn.commit()
+
+    def update_product_price(self, product_id, new_price):
+        self.cursor.execute("UPDATE products SET price = ? WHERE id = ?", (new_price, product_id))
+        self.conn.commit()
+
+    def delete_product(self, product_id):
+        self.cursor.execute("DELETE FROM products WHERE id = ?", (product_id,))
+        self.conn.commit()
+
+    def toggle_product_availability(self, product_id, is_available):
+        self.cursor.execute("UPDATE products SET is_available = ? WHERE id = ?", (is_available, product_id))
+        self.conn.commit()
+
+    def get_products_by_category(self, category_id):
+        return self.cursor.execute("SELECT * FROM products WHERE category_id = ?", (category_id,)).fetchall()
+
+    def get_all_categories(self):
+        return self.cursor.execute("SELECT * FROM categories").fetchall()
+
+    # --- Promo Codes ---
+    def create_promo_code(self, code, discount_percent, expiry_date=None):
+        self.cursor.execute("INSERT INTO promo_codes (code, discount_percent, expiry_date) VALUES (?, ?, ?)",
+                            (code, discount_percent, expiry_date))
+        self.conn.commit()
+
+    def get_promo_code(self, code):
+        return self.cursor.execute("SELECT * FROM promo_codes WHERE code = ? AND is_active = 1", (code,)).fetchone()
+
+    def delete_promo_code(self, code_id):
+        self.cursor.execute("DELETE FROM promo_codes WHERE id = ?", (code_id,))
+        self.conn.commit()
+
+    def get_all_promo_codes(self):
+        return self.cursor.execute("SELECT * FROM promo_codes").fetchall()
+
+    # --- Users ---
+    def get_all_users(self):
+        return self.cursor.execute("SELECT user_id FROM users").fetchall()
 
 db = Database("yummy_bot.db")
 db._create_users_table()

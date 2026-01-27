@@ -17,6 +17,7 @@ class OrderState(StatesGroup):
     phone = State()
     method = State()
     location = State()
+    promo = State()
     confirm = State()
 
 # Temporary basket storage
@@ -45,7 +46,7 @@ async def show_admin_menu(message: types.Message):
     user_id = message.from_user.id
     if user_id in (SUPER_ADMINS + WORKERS):
         is_super = user_id in SUPER_ADMINS
-        await message.answer("Admin paneli faollashtirildi.", reply_markup=akb.admin_reply_menu())
+        await message.answer("Admin paneli faollashtirildi.", reply_markup=akb.admin_reply_menu(is_super))
         await message.answer(
             build_admin_dashboard_text(user_id),
             reply_markup=akb.admin_profile_kb(is_super=is_super),
@@ -123,15 +124,10 @@ async def get_method(message: types.Message, state: FSMContext):
         await state.update_data(total_price=total_price, items_str=items_str)
         
         method_text = s['method_takeaway'] + " " + s['takeaway_label']
-        confirm_text = s['confirm_summary'].format(
-            items=items_str, 
-            method=method_text,
-            location="N/A", 
-            total=total_price
-        )
+        await state.update_data(total_price=total_price, items_str=items_str, method_text=method_text)
         
-        await state.set_state(OrderState.confirm)
-        await message.answer(confirm_text, reply_markup=kb.order_confirm_kb(lang), parse_mode="Markdown")
+        await message.answer(s['promo_req'], reply_markup=kb.promo_skip_kb(lang))
+        await state.set_state(OrderState.promo)
     else:
         await message.answer(s['method_req'], reply_markup=kb.delivery_method_kb(lang))
 
@@ -160,20 +156,57 @@ async def get_location(message: types.Message, state: FSMContext):
     method = user_data.get('method', 'delivery')
     
     if method == 'delivery':
-        # total_price += 0 # Delivery is free for now
         method_text = s['method_delivery'] + " " + s['delivery_fee_label']
     else:
         method_text = s['method_takeaway'] + " " + s['takeaway_label']
     
     items_str = "\n".join([f"- {i['name']} x {i['quantity']}" for i in items])
-    await state.update_data(location=location_str, maps_url=maps_url, total_price=total_price, items_str=items_str)
+    await state.update_data(location=location_str, maps_url=maps_url, total_price=total_price, items_str=items_str, method_text=method_text)
+
+    await message.answer(s['promo_req'], reply_markup=kb.promo_skip_kb(lang))
+    await state.set_state(OrderState.promo)
+
+@router.callback_query(OrderState.promo, F.data == "skip_promo")
+async def skip_promo(callback: types.CallbackQuery, state: FSMContext):
+    await show_order_summary(callback.message, state)
+    await callback.answer()
+
+@router.message(OrderState.promo)
+async def apply_promo(message: types.Message, state: FSMContext):
+    lang = db.get_user_lang(message.from_user.id)
+    s = STRINGS[lang]
+    code = message.text.upper()
+    promo = db.get_promo_code(code)
+    
+    if promo:
+        discount = promo[2]
+        await state.update_data(promo_code=code, discount_percent=discount)
+        await message.answer(s['promo_applied'].format(percent=discount))
+        await show_order_summary(message, state)
+    else:
+        await message.answer(s['promo_invalid'], reply_markup=kb.promo_skip_kb(lang))
+
+async def show_order_summary(message: types.Message, state: FSMContext):
+    lang = db.get_user_lang(message.from_user.id)
+    s = STRINGS[lang]
+    data = await state.get_data()
+    
+    total = data['total_price']
+    if 'discount_percent' in data:
+        total = int(total * (1 - data['discount_percent'] / 100))
+        await state.update_data(final_total=total)
+    else:
+        await state.update_data(final_total=total)
 
     confirm_text = s['confirm_summary'].format(
-        items=items_str, 
-        method=method_text,
-        location=location_str, 
-        total=total_price
+        items=data['items_str'], 
+        method=data['method_text'],
+        location=data.get('location', 'N/A'), 
+        total=total
     )
+    
+    if 'promo_code' in data:
+        confirm_text += f"\n🎟 **Promo:** {data['promo_code']} (-{data['discount_percent']}%)"
 
     await state.set_state(OrderState.confirm)
     await message.answer(confirm_text, reply_markup=kb.order_confirm_kb(lang), parse_mode="Markdown")
@@ -187,7 +220,7 @@ async def finalize_order(callback: types.CallbackQuery, state: FSMContext):
     user_name = callback.from_user.full_name
     user_username = f"@{callback.from_user.username}" if callback.from_user.username else "Noma'lum"
     
-    order_id = db.create_order(user_id, data['items_str'], data['total_price'], data['location'])
+    order_id = db.create_order(user_id, data['items_str'], data['final_total'], data['location'])
     db.add_user(user_id, user_name, data['phone'])
 
     await callback.message.edit_text(s['order_received'].format(id=order_id))
@@ -198,12 +231,15 @@ async def finalize_order(callback: types.CallbackQuery, state: FSMContext):
     admin_msg += f"🆔 Nickname: [{user_username}](tg://user?id={user_id})\n"
     admin_msg += f"📞 Tel: {data['phone']}\n"
     
+    if 'promo_code' in data:
+        admin_msg += f"🎟 Promo: {data['promo_code']} (-{data['discount_percent']}%)\n"
+
     method_str = "🛵 Kuryer orqali" if data.get('method') == 'delivery' else "🏃 O'zi boradi (Self-pickup)"
     admin_msg += f"🛒 Usul: {method_str}\n"
     
     admin_msg += f"📍 Manzil: {data['maps_url'] if data.get('maps_url') else 'N/A (O\'zim boraman)'}\n\n"
     admin_msg += f"🧾 Taomlar:\n{data['items_str']}\n\n"
-    admin_msg += f"💰 Jami: {data['total_price']:,} so'm"
+    admin_msg += f"💰 Jami: {data['final_total']:,} so'm"
 
     from keyboards.admin_keyboards import order_initial_kb
     for worker_id in WORKERS:
