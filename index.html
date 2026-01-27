@@ -455,7 +455,8 @@
                     </div>
                 `;
             }).join('');
-            setTimeout(initScrollSpy, 100)
+            setTimeout(initScrollSpy, 100);
+        }
         function renderProductCard(item) {
             const rawName = item.raw_name || item.n;
             const name = translate(rawName);
@@ -471,7 +472,7 @@
                     </div>
                     <div class="px-4 py-5">
                         <h3 class="font-black text-[12px] leading-tight tracking-tight text-gray-800 dark:text-zinc-100 line-clamp-2 h-8">${name}</h3>
-                        <p class="text-red-500 font-extrabold text-[15px] mt-1 tracking-tighter">${price.toLocaleSt</p>
+                        <p class="text-red-500 font-extrabold text-[15px] mt-1 tracking-tighter">${price.toLocaleString()} so'm</p>
                     </div>
                 </div>
             `;
@@ -588,7 +589,7 @@
         const modal = document.getElementById('cart-modal'), sheet = document.getElementById('cart-sheet'), overlay = document.getElementById('cart-overlay');
         function openCart() { modal.classList.remove('hidden'); setTimeout(() => { overlay.style.opacity = "1"; sheet.classList.remove('translate-y-full'); }, 10); renderCartItems(); }
         function closeCart() { overlay.style.opacity = "0"; sheet.classList.add('translate-y-full'); setTimeout(() => modal.classList.add('hidden'), 500); }
-        
+
         function renderCartItems() {
             const container = document.getElementById('cart-items');
             let total = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
@@ -603,7 +604,7 @@
                             <span class="text-xs font-bold w-4 text-center">${item.quantity}</span>
                             <button onclick="changeQty(${item.id}, 1)" class="w-7 h-7 rounded-xl bg-white dark:bg-zinc-700 shadow-sm flex items-center justify-center font-bold">+</button>
                         </div>
-                  </iv>
+                    </div>
                `).join('');
             }
             const deliveryFee = 15000, finalTotal = total > 0 ? total + deliveryFee : 0;
@@ -614,23 +615,23 @@
             </div>`;
         }
 
-        window.changeQty = (id, delta) => { 
-            const idx = cart.findIndex(i => i.id === id); 
-            cart[idx].quantity += delta; 
-            if (cart[idx].quantity <= 0) cart.splice(idx, 1); 
-            renderCartItems(); updateCartUI(); 
+        window.changeQty = (id, delta) => {
+            const idx = cart.findIndex(i => i.id === id);
+            cart[idx].quantity += delta;
+            if (cart[idx].quantity <= 0) cart.splice(idx, 1);
+            renderCartItems(); updateCartUI();
             if (cart.length === 0) closeCart();
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); 
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
         document.getElementById('cart-btn').onclick = openCart;
         overlay.onclick = closeCart;
-       document.getElementById('clear-cart').onclick = () => { cart = []; updateCartUI(); closeCart(); };
+        document.getElementById('clear-cart').onclick = () => { cart = []; updateCartUI(); closeCart(); };
         document.getElementById('checkout-btn').onclick = () => {
             const total = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
             const promo = document.getElementById('promo-input').value.trim();
             const payload = { type: 'order', items: cart, total: (total + 15000), promo_code: promo || null };
-            
+
             const send = () => { tg.sendData(JSON.stringify(payload)); tg.close(); };
             try { const cached = localStorage.getItem('yummy_last_geo'); if (cached) payload.location = JSON.parse(cached); } catch (e) { }
             if (!navigator.geolocation) return send();
@@ -644,13 +645,13 @@
         };
 
         tg.onEvent('mainButtonClicked', openCart);
-        document.getElementById('search-toggle').onclick = () => { 
-            const box = document.getElementById('search-container'); 
-            box.classList.toggle('hidden'); 
-            if (!box.classList.contains('hidden')) document.getElementById('search-input').focus(); 
+        document.getElementById('search-toggle').onclick = () => {
+            const box = document.getElementById('search-container');
+            box.classList.toggle('hidden');
+            if (!box.classList.contains('hidden')) document.getElementById('search-input').focus();
         }
         document.getElementById('search-input').oninput = (e) => renderMenu(e.target.value);
-        
+
         tg.expand();
         tg.ready();
         if (tg.colorScheme === 'dark') {
