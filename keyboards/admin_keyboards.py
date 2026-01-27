@@ -27,10 +27,12 @@ def admin_profile_kb(is_super=False):
 
 def admin_reply_menu(is_super=False):
     kb = []
-    kb.append([KeyboardButton(text="📊 Dashboard"), KeyboardButton(text="🛍 Buyurtmalar")])
     if is_super:
-        kb.append([KeyboardButton(text="🍽 Menu Boshqaruvi")])
-        kb.append([KeyboardButton(text="🎟 Promolar"), KeyboardButton(text="📢 Mailing")])
+        kb.append([KeyboardButton(text="📊 Statistika"), KeyboardButton(text="📈 Analitika")])
+        kb.append([KeyboardButton(text="🍴 Menu Boshqaruvi")])
+        kb.append([KeyboardButton(text="📄 Excel Hisobot")])
+    else:
+        kb.append([KeyboardButton(text="🛍 Buyurtmalar"), KeyboardButton(text="📦 Worker Info")])
     kb.append([KeyboardButton(text="🏠 Foydalanuvchi menyusi")])
     return ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
 

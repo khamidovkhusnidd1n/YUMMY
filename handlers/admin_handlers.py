@@ -155,7 +155,8 @@ async def show_stats_callback(event: types.Message | types.CallbackQuery):
         await message.answer(text, parse_mode="Markdown")
 
 @router.callback_query(F.data == "admin_analytics", F.from_user.id.in_(SUPER_ADMINS))
-async def show_analytics_callback(callback: types.CallbackQuery):
+async def show_analytics_callback(event: types.CallbackQuery | types.Message):
+    message = event if isinstance(event, types.Message) else event.message
     top_products = db.get_top_products()
     top_customers = db.get_top_customers()
     
@@ -164,7 +165,6 @@ async def show_analytics_callback(callback: types.CallbackQuery):
     text += "🍱 **Eng ko'p sotilgan taomlar:**\n"
     if top_products:
         for items, count in top_products:
-            # Simple cleaning for display
             clean_items = items.replace("- ", "").replace("\n", ", ")
             text += f"- {clean_items}: {count} ta\n"
     else:
@@ -177,8 +177,9 @@ async def show_analytics_callback(callback: types.CallbackQuery):
     else:
         text += "Ma'lumot mavjud emas.\n"
         
-    await callback.message.answer(text, parse_mode="Markdown")
-    await callback.answer()
+    await message.answer(text, parse_mode="Markdown")
+    if isinstance(event, types.CallbackQuery):
+        await event.answer()
 
 @router.callback_query(F.data == "admin_menu_manage", F.from_user.id.in_(SUPER_ADMINS))
 async def admin_menu_manage_callback(callback: types.CallbackQuery):
@@ -204,16 +205,19 @@ async def admin_mailing_callback(callback_event: types.CallbackQuery | types.Mes
     else:
         await callback_event.answer("📢 **Mailing (Xabar yuborish)**", reply_markup=mailing_kb())
 
-# --- Text-based shortcuts for other admin menus ---
+# --- Text-based shortcuts for admin reply keyboard buttons ---
 
-# --- Text-based shortcuts for other admin menus ---
+@router.message(F.text == "📊 Statistika", F.from_user.id.in_(SUPER_ADMINS))
+async def admin_stats_msg(message: types.Message):
+    await show_stats_callback(message)
 
-@router.message(F.text == "📊 Dashboard", F.from_user.id.in_(ALL_ADMINS))
-async def admin_dashboard_msg(message: types.Message):
-    user_id = message.from_user.id
-    is_super = user_id in SUPER_ADMINS
-    text = build_admin_dashboard_text(user_id)
-    await message.answer(text, reply_markup=admin_profile_kb(is_super), parse_mode="Markdown")
+@router.message(F.text == "📈 Analitika", F.from_user.id.in_(SUPER_ADMINS))
+async def admin_analytics_msg(message: types.Message):
+    await show_analytics_callback(FakeCallback(message))
+
+@router.message(F.text == "📄 Excel Hisobot", F.from_user.id.in_(SUPER_ADMINS))
+async def admin_report_msg(message: types.Message):
+    await get_report_callback(message)
 
 @router.message(F.text == "🛍 Buyurtmalar", F.from_user.id.in_(ALL_ADMINS))
 async def admin_orders_msg(message: types.Message):
@@ -222,7 +226,7 @@ async def admin_orders_msg(message: types.Message):
         async def answer(self): pass
     await admin_orders_callback(FakeCallback(message))
 
-@router.message(F.text == "🍽 Menu Boshqaruvi", F.from_user.id.in_(SUPER_ADMINS))
+@router.message(F.text == "🍴 Menu Boshqaruvi", F.from_user.id.in_(SUPER_ADMINS))
 async def admin_menu_manage_msg(message: types.Message):
     await message.answer("🍴 **Menu Boshqaruvi**\n\nBu yerdan taomlar qo'shishingiz, narxlarni o'zgartirishingiz yoki taomlarni o'chirishingiz mumkin.", reply_markup=menu_manage_kb())
     await message.answer("Menu boshqaruvi tugmalari pastga qo'shildi.", reply_markup=menu_manage_reply_kb())
