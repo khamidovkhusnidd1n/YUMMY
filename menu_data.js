@@ -1,4 +1,3 @@
-
 // Auto-generated menu data
 window.DYNAMIC_MENU_DATA = {
     "🌯 Lavash": [
@@ -305,3 +304,112 @@ window.DYNAMIC_CATS = {
         "🥫 Souslar": "🥫 Sauces"
     }
 };
+
+// Pagination tizimi
+const MENU_PAGINATION = {
+    pageSize: 20,
+    currentPage: 0,
+    totalPages: 0
+};
+
+// Asosiy menu data (kompakt format)
+const MENU_DATA_COMPACT = {
+    "🔥 Specials": [
+        { "n": "Kfc BURGER (+0.25 Cola)", "p": 33000, "i": "images/image2/kfc_burger.webp" },
+        { "n": "Kfc HAGGI (+0.25 Cola)", "p": 38000, "i": "images/image2/kfc_haggi_cola.webp" }
+    ],
+    "🌯 Lavash": [
+        { "n": "Standart", "p": 30000, "i": "images/lavash.webp" },
+        { "n": "Pishloqli", "p": 35000, "i": "images/lavash.webp" },
+        { "n": "Big", "p": 40000, "i": "images/lavash.webp" },
+        { "n": "Big pishloq", "p": 45000, "i": "images/lavash.webp" }
+    ],
+    "🍔 Burger": [
+        { "n": "Gamburger", "p": 28000, "i": "images/burger.webp" },
+        { "n": "Chizburger", "p": 33000, "i": "images/burger.webp" },
+        { "n": "Double", "p": 35000, "i": "images/double_burger.webp" },
+        { "n": "Double chiz", "p": 40000, "i": "images/double_burger.webp" }
+    ],
+    "🥙 Doner": [
+        { "n": "Standart", "p": 25000, "i": "images/image2/donar.webp" },
+        { "n": "Big", "p": 30000, "i": "images/image2/donar.webp" },
+        { "n": "Chiz", "p": 35000, "i": "images/image2/donar.webp" }
+    ],
+    "🍗 KFC": [
+        { "n": "File strips", "p": 90000, "i": "images/kfc_strips.webp" },
+        { "n": "Qanot", "p": 85000, "i": "images/kfc_wings.webp" },
+        { "n": "Lunch box", "p": 30000, "i": "images/kfc_lunch.webp" },
+        { "n": "Kfc xaggi", "p": 30000, "i": "images/image2/xaggi.webp" }
+    ],
+    "🌭 Xot-dog": [
+        { "n": "Mini", "p": 10000, "i": "images/image2/hot_dog.webp" },
+        { "n": "Twins", "p": 17000, "i": "images/image2/hot_dog.webp" },
+        { "n": "Big (45sm)", "p": 22000, "i": "images/image2/hot_dog.webp" },
+        { "n": "Super (45sm)", "p": 25000, "i": "images/image2/hot_dog.webp" },
+        { "n": "Canada (45sm)", "p": 25000, "i": "images/hotdog_canada.webp" }
+    ],
+    "🥪 Xaggi": [
+        { "n": "Standart", "p": 35000, "i": "images/image2/xaggi.webp" },
+        { "n": "Big", "p": 45000, "i": "images/image2/xaggi.webp" },
+        { "n": "Xot let", "p": 28000, "i": "images/image2/xaggi.webp" }
+    ],
+    "🍗 Naggets": [
+        { "n": "Nuggets", "p": 22000, "i": "images/naggets.webp" },
+        { "n": "Nuggets mini", "p": 11000, "i": "images/naggets.webp" }
+    ],
+    "🧀 Pishloqli yostiqchalar": [
+        { "n": "Yostiqchalar", "p": 28000, "i": "images/pishloqli.webp" },
+        { "n": "Yostiqchalar mini", "p": 14000, "i": "images/pishloqli.webp" }
+    ],
+    "🥪 Klab sandwich": [
+        { "n": "Standart", "p": 35000, "i": "images/sandwich.webp" }
+    ],
+    "🍟 Fri": [
+        { "n": "Standart", "p": 15000, "i": "images/fri.webp" },
+        { "n": "Big", "p": 17000, "i": "images/fri.webp" }
+    ],
+    "🥟 Somsa": [
+        { "n": "Go'shtli", "p": 10000, "i": "images/somsa.webp" },
+        { "n": "Pishloqli tovuq", "p": 7000, "i": "images/somsa.webp" },
+        { "n": "Ko'k", "p": 5000, "i": "images/somsa.webp" },
+        { "n": "Kartoshka", "p": 5000, "i": "images/somsa.webp" }
+    ],
+    "☕️ Ichimliklar": [
+        { "n": "Choy", "p": 3000, "i": "images/image2/tea.webp" },
+        { "n": "Kofe", "p": 5000, "i": "images/image2/coffee.webp" },
+        { "n": "Kofe (Big)", "p": 7000, "i": "images/image2/coffee.webp" },
+        { "n": "Choy mevali", "p": 10000, "i": "images/image2/tea_via_fruits.webp" }
+    ],
+    "🍹 Cocktails": [
+        { "n": "Tropic", "p": 15000, "i": "images/image2/tropic.webp" },
+        { "n": "Moxito", "p": 15000, "i": "images/image2/moxito.webp" },
+        { "n": "O'rmon mevalari", "p": 15000, "i": "images/image2/forest_fruits.webp" }
+    ],
+    "🥫 Souslar": [
+        { "n": "Sous", "p": 4000, "i": "images/image2/sous.webp" }
+    ]
+};
+
+// Dinamik import qolma
+const MENU_DATA = MENU_DATA_COMPACT;
+
+// Pagination funksiyasi
+function getPagedItems(page = 0) {
+    const allItems = [];
+    Object.values(MENU_DATA).forEach(items => {
+        allItems.push(...items);
+    });
+    
+    const start = page * MENU_PAGINATION.pageSize;
+    const end = start + MENU_PAGINATION.pageSize;
+    
+    return {
+        items: allItems.slice(start, end),
+        totalPages: Math.ceil(allItems.length / MENU_PAGINATION.pageSize),
+        currentPage: page
+    };
+}
+
+// Export untuk lazy loading
+window.MENU_DATA = MENU_DATA;
+window.getPagedItems = getPagedItems;

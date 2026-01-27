@@ -4,16 +4,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Yummy - Premium Delivery</title>
+    <meta name="description"
+        content="Yummy - Premium Food Delivery Service. Order delicious food online with fast delivery. 🍔🌮🍜">
+    <meta name="keywords" content="food delivery, restaurant, online order, fast food">
+    <meta name="author" content="Yummy Delivery">
+    <meta name="theme-color" content="#dc2626">
+    <meta property="og:title" content="Yummy - Premium Delivery">
+    <meta property="og:description" content="Order delicious food with fast delivery">
+    <meta property="og:image" content="https://yummy.uz/og-image.jpg">
+    <title>Yummy - Premium Food Delivery | Order Online Now</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="menu_data.js?v=1769524000"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="utils.js?v=1769524000"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <script>
+        // Early theme init to prevent white flash
+        (function() {
+            const THEME_STORAGE_KEY = 'yummy_theme';
+            try {
+                const saved = localStorage.getItem(THEME_STORAGE_KEY);
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (saved === 'dark' || (!saved && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
     <style>
         :root {
             --tg-theme-bg-color: #ffffff;
             --tg-theme-text-color: #000000;
             --accent: #dc2626;
+        }
+
+        html.dark,
+        .dark body {
+            background: #0c0c0c;
+            color: white;
         }
 
         body {
@@ -22,11 +50,6 @@
             background: #fcfcfc;
             overflow-x: hidden;
             scroll-behavior: smooth;
-        }
-
-        .dark body {
-            background: #0c0c0c;
-            color: white;
         }
 
         .category-active {
@@ -183,6 +206,365 @@
             font-size: 0.85rem;
             color: rgba(255, 255, 255, 0.8);
         }
+
+        /* ===== SEARCH IMPROVEMENTS ===== */
+        .search-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f3f4f6 0%, #ffffff 100%);
+            border-bottom: 2px solid #dc2626;
+        }
+
+        .dark .search-results-header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+            border-bottom-color: #ef4444;
+        }
+
+        .back-to-menu-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 999px;
+            font-weight: 900;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+        }
+
+        .back-to-menu-btn:hover {
+            background: #b91c1c;
+            transform: translateX(-4px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        }
+
+        .back-to-menu-btn:active {
+            transform: scale(0.95);
+        }
+
+        .search-filter-chips {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .search-filter-chips {
+            border-top-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .filter-chip {
+            padding: 0.5rem 1rem;
+            background: #f3f4f6;
+            color: #374151;
+            border: 2px solid #e5e7eb;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dark .filter-chip {
+            background: #1f2937;
+            color: #d1d5db;
+            border-color: #374151;
+        }
+
+        .filter-chip:hover,
+        .filter-chip.active {
+            background: #dc2626;
+            color: white;
+            border-color: #dc2626;
+            transform: scale(1.05);
+        }
+
+        .search-autocomplete {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            dark: #0f0f0f;
+            border-radius: 1.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            margin-top: 0.5rem;
+        }
+
+        .dark .search-autocomplete {
+            background: #1a1a1a;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .autocomplete-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .dark .autocomplete-item {
+            border-bottom-color: #1f2937;
+        }
+
+        .autocomplete-item:hover {
+            background: #f9fafb;
+        }
+
+        .dark .autocomplete-item:hover {
+            background: #1f2937;
+        }
+
+        .autocomplete-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 0.75rem;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .dark .autocomplete-icon {
+            background: #2d2d2d;
+        }
+
+        /* ===== MOBILE RESPONSIVENESS ===== */
+        @media (max-width: 640px) {
+            .promo-card {
+                min-height: 180px;
+            }
+
+            .promo-card-overlay {
+                padding: 0.75rem;
+            }
+
+            .promo-card-badge {
+                font-size: 9px;
+                padding: 0.2rem 0.75rem;
+            }
+
+            .promo-card-price {
+                font-size: 1rem;
+            }
+
+            .category-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.75rem;
+            }
+
+            #search-input {
+                font-size: 16px;
+                /* Prevents zoom on iOS */
+            }
+
+            .product-card {
+                border-radius: 2rem;
+            }
+
+            .product-card img {
+                border-radius: 1.5rem;
+            }
+
+            button {
+                min-height: 44px;
+                /* Touch-friendly */
+                min-width: 44px;
+            }
+
+            .quantity-btn {
+                width: 36px;
+                height: 36px;
+            }
+
+            .back-to-menu-btn {
+                padding: 0.625rem 1.25rem;
+                font-size: 0.8125rem;
+            }
+        }
+
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .promo-card {
+                min-height: 240px;
+            }
+
+            .category-btn {
+                padding: 0.625rem 1.25rem;
+                font-size: 0.875rem;
+            }
+
+            .product-card {
+                border-radius: 2.5rem;
+            }
+
+            #menu-sections {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 2rem;
+                padding: 0 1rem;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .promo-card {
+                min-height: 280px;
+            }
+
+            .promo-grid-desktop {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+
+            .category-btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .product-card {
+                border-radius: 3rem;
+            }
+        }
+
+        /* ===== DARK MODE TEXT CONTRAST ===== */
+        .dark .product-card h3 {
+            color: #f5f5f5;
+            /* AAA standard - Minimum 7:1 ratio */
+            font-weight: 900;
+        }
+
+        .dark .product-card p {
+            color: #fca5a5;
+            /* AAA standard for prices */
+        }
+
+        .dark .category-btn {
+            color: #a3a3a3;
+        }
+
+        .dark .category-btn:hover {
+            color: #e5e5e5;
+        }
+
+        .dark input::placeholder {
+            color: #707070;
+            /* AAA contrast for placeholder */
+        }
+
+        .dark a {
+            color: #60a5fa;
+            /* Better link visibility */
+        }
+
+        .dark button {
+            color: #ffffff;
+        }
+
+        .dark h1,
+        .dark h2,
+        .dark h3,
+        .dark h4 {
+            color: #f9fafb;
+        }
+
+        .dark .menu-section h2 {
+            color: #f0f0f0;
+        }
+
+        /* ===== NIGHT MODE ICON ===== */
+        .theme-toggle-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(251, 191, 36, 0.4);
+            transition: all 0.3s ease;
+            z-index: 40;
+        }
+
+        .dark .theme-toggle-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+        }
+
+        .theme-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(251, 191, 36, 0.6);
+        }
+
+        .theme-toggle-btn:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 640px) {
+            .theme-toggle-btn {
+                width: 48px;
+                height: 48px;
+                bottom: 1.5rem;
+                right: 1.5rem;
+                font-size: 1.25rem;
+            }
+        }
+
+        /* ===== ENHANCED PROMO SCROLL ===== */
+        #promo-grid {
+            scroll-behavior: smooth;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #promo-grid::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        #promo-grid::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #promo-grid::-webkit-scrollbar-thumb {
+            background: #dc2626;
+            border-radius: 2px;
+        }
+
+        /* ===== ACCESSIBILITY ===== */
+        button:focus,
+        input:focus,
+        a:focus {
+            outline: 3px solid #dc2626;
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
     </style>
 </head>
 
@@ -212,10 +594,28 @@
         </div>
     </header>
 
-    <!-- Search Box -->
+    <!-- Search Box (Enhanced) -->
     <div id="search-container" class="fixed top-20 left-0 right-0 z-40 px-6 py-4 hidden animate-item">
-        <input type="text" id="search-input" placeholder="Search..."
-            class="w-full h-14 bg-white dark:bg-zinc-900 rounded-3xl px-6 font-bold shadow-2xl border-2 border-red-500/20 focus:border-red-500 outline-none transition-all">
+        <div class="relative">
+            <input type="text" id="search-input" placeholder="Search..."
+                class="w-full h-14 bg-white dark:bg-zinc-900 rounded-3xl px-6 font-bold shadow-2xl border-2 border-red-500/20 focus:border-red-500 outline-none transition-all">
+            <div id="search-autocomplete" class="search-autocomplete hidden"></div>
+        </div>
+        <div id="search-filters" class="search-filter-chips hidden"></div>
+    </div>
+
+    <!-- Search Results Header (Hidden by default) -->
+    <div id="search-results-header" class="search-results-header hidden mt-20 mb-4">
+        <div>
+            <h2 class="text-xl font-black text-gray-900 dark:text-white">Search Results</h2>
+            <p id="search-result-count" class="text-sm text-gray-500 dark:text-gray-400 mt-1">Found items</p>
+        </div>
+        <button id="back-to-menu" class="back-to-menu-btn">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Menu
+        </button>
     </div>
 
     <!-- Featured -->
@@ -230,6 +630,11 @@
 
     <!-- Menu -->
     <div id="menu-sections" class="mt-6 space-y-8 pb-12 w-full flex flex-col"></div>
+
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle" class="theme-toggle-btn" title="Toggle dark mode" aria-label="Toggle dark mode">
+        <span id="theme-icon">🌙</span>
+    </button>
 
     <!-- Cart Modal -->
     <div id="cart-modal" class="fixed inset-0 z-[60] hidden">
@@ -261,12 +666,21 @@
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
+        const tg = window.Telegram?.WebApp ?? null;
+        const safeTelegramCall = (callback) => {
+            if (!tg || typeof callback !== 'function') return;
+            try {
+                callback(tg);
+            } catch (err) {
+                console.warn('Telegram API error:', err);
+            }
+        };
         const urlParams = new URLSearchParams(window.location.search);
         const STORAGE_KEY = 'yummy_lang';
         const DELIVERY_THRESHOLD = 50000;
         const BASE_DELIVERY_FEE = 15000;
         const SUPPORTED_LANGS = ['uz', 'ru', 'en'];
+        const safeGetById = (id) => document.getElementById(id);
         const queryLang = urlParams.get('lang');
         let persistedLang = null;
         try { persistedLang = localStorage.getItem(STORAGE_KEY); } catch (error) { persistedLang = null; }
@@ -354,6 +768,7 @@
                 'delivery_fee_note': "Delivery up to 50,000 so'm costs 15,000 so'm"
             }
         };
+        const S = LANG_STRINGS[CURRENT_LANG];
 
         const ITEM_NAMES = {
             ru: {
@@ -407,35 +822,71 @@
             }
         ];
 
-        const PROMO_CODES = {
-            'YUMMY10': { discount: 10, type: 'percent' },
-            'YUMMY5000': { discount: 5000, type: 'fixed' },
-            'WELCOME': { discount: 15, type: 'percent' }
+        // ===== DISCOUNT SYSTEM =====
+        function calculateQuantityDiscount(itemCount) {
+            if (itemCount >= 5) return 10; // 10% discount
+            if (itemCount >= 2) return 5;  // 5% discount
+            return 0;
+        }
+
+        function applyQuantityDiscount(total, itemCount) {
+            const discountPercent = calculateQuantityDiscount(itemCount);
+            return Math.floor(total * discountPercent / 100);
+        }
+
+        const ENHANCED_PROMO_CODES = {
+            'YUMMY10': { discount: 10, type: 'percent', minAmount: 0, description: '10% off any order' },
+            'YUMMY5000': { discount: 5000, type: 'fixed', minAmount: 25000, description: '5000 so\'m off orders over 25000' },
+            'WELCOME': { discount: 15, type: 'percent', minAmount: 0, description: '15% welcome bonus', firstTimeOnly: true },
+            'FRIEND20': { discount: 20, type: 'percent', minAmount: 50000, description: '20% off orders over 50000' },
+            'LUNCH50': { discount: 50, type: 'fixed', minAmount: 0, description: '50 so\'m off lunch (11-14)' }
         };
 
-        function validatePromoCode(code) {
-            if (!code) return { valid: false, discount: 0 };
-            const promo = PROMO_CODES[code.toUpperCase()];
-            if (!promo) return { valid: false, discount: 0 };
-            return { valid: true, ...promo };
-        }
-
-        function calculateDiscount(total, promoResult) {
-            if (!promoResult.valid) return 0;
-            if (promoResult.type === 'percent') {
-                return Math.floor(total * promoResult.discount / 100);
+        function validatePromoCode(code, total, isFirstTime = false) {
+            if (!code) return { valid: false, discount: 0, message: '' };
+            const promo = ENHANCED_PROMO_CODES[code.toUpperCase()];
+            if (!promo) return { valid: false, discount: 0, message: '❌ Invalid promo code' };
+            if (total < promo.minAmount) {
+                return { valid: false, discount: 0, message: `❌ Minimum order ${promo.minAmount.toLocaleString()} so'm` };
             }
-            return promoResult.discount;
+            if (promo.firstTimeOnly && !isFirstTime) {
+                return { valid: false, discount: 0, message: '❌ First-time users only' };
+            }
+            if (code.toUpperCase() === 'LUNCH50') {
+                const hour = new Date().getHours();
+                if (hour < 11 || hour >= 14) {
+                    return { valid: false, discount: 0, message: '❌ Lunch offer 11:00-14:00 only' };
+                }
+            }
+            return { valid: true, ...promo, message: `✅ ${promo.description}` };
         }
 
-        const S = LANG_STRINGS[CURRENT_LANG] || LANG_STRINGS['uz'];
+        function calculateFinalDiscount(total, promoCode, quantityCount, isFirstTime = false) {
+            const promoResult = validatePromoCode(promoCode, total, isFirstTime);
+            let totalDiscount = 0;
+            if (quantityCount >= 2) {
+                totalDiscount += applyQuantityDiscount(total, quantityCount);
+            }
+            if (promoResult.valid) {
+                let promoDiscount = 0;
+                if (promoResult.type === 'percent') {
+                    promoDiscount = Math.floor((total - totalDiscount) * promoResult.discount / 100);
+                } else {
+                    promoDiscount = promoResult.discount;
+                }
+                totalDiscount += promoDiscount;
+            }
+            return { totalDiscount, promoResult };
+        }
 
-        // Apply translations to static elements
-        document.getElementById('search-input').placeholder = S.search_placeholder;
-        document.getElementById('cart-title').innerText = S.cart_title;
-        document.getElementById('cart-sub').innerText = S.cart_sub;
-        document.getElementById('checkout-btn').querySelector('span').innerText = S.order_btn;
-        document.getElementById('promo-input').placeholder = S.promo_placeholder;
+
+        const _cb = document.getElementById('checkout-btn');
+        if (_cb) {
+            const _span = _cb.querySelector('span');
+            if (_span) _span.innerText = S.order_btn;
+        }
+        const _pi = document.getElementById('promo-input');
+        if (_pi) _pi.placeholder = S.promo_placeholder;
 
         const MENU_DATA = {
             "🔥 Specials": [
@@ -509,11 +960,14 @@
                 { "n": "Moxito", "p": 15000, "i": "images/image2/moxito.png" },
                 { "n": "O'rmon mevalari", "p": 15000, "i": "images/image2/forest_fruits.png" }
             ],
-
             "🥫 Souslar": [
                 { "n": "Sous", "p": 4000, "i": "images/image2/sous.png" }
             ]
         };
+
+        const searchResultsHeader = safeGetById('search-results-header');
+        const searchFilters = safeGetById('search-filters');
+        const searchResultCount = safeGetById('search-result-count');
 
         // --- DYNAMIC DATA INTEGRATION ---
         if (window.DYNAMIC_MENU_DATA) {
@@ -556,7 +1010,8 @@
         });
 
         function renderCategories() {
-            const container = document.getElementById('categories-container');
+            const container = safeGetById('categories-container');
+            if (!container) return;
             container.innerHTML = Object.keys(MENU_DATA).map(cat => {
                 const safeId = cat.replace(/[^a-zA-Z0-9]/g, '');
                 return `
@@ -586,20 +1041,38 @@
         }
 
         function renderMenu(searchTerm = "") {
-            const container = document.getElementById('menu-sections');
+            const container = safeGetById('menu-sections');
+            if (!container) return;
             if (searchTerm) {
                 paginationMode = false;
                 const filtered = FLAT_ITEMS.filter(i => translate(i.raw_name).toLowerCase().includes(searchTerm.toLowerCase()));
+
+                if (searchResultsHeader) searchResultsHeader.classList.remove('hidden');
+                if (searchResultCount) searchResultCount.textContent = `Found ${filtered.length} item${filtered.length !== 1 ? 's' : ''}`;
+
+                const categories = [...new Set(filtered.map(i => i.cat))];
+                if (searchFilters) {
+                    searchFilters.classList.remove('hidden');
+                    searchFilters.innerHTML = categories.map(cat => `
+                        <button class="filter-chip" onclick="filterByCategory('${cat.replace(/'/g, "\\\\'")}', '${searchTerm.replace(/'/g, "\\\\'")}')">
+                            ${translate(cat, 'cat')}
+                        </button>
+                    `).join('');
+                }
+
                 container.innerHTML = `<div class="px-6 grid grid-cols-2 gap-4">${filtered.map(item => renderProductCard(item)).join('')}</div>`;
                 if (!filtered.length) container.innerHTML = `<div class="py-20 text-center text-gray-400 font-bold">${S.not_found}</div>`;
+
                 return;
             }
+
+            if (searchResultsHeader) searchResultsHeader.classList.add('hidden');
+            if (searchFilters) searchFilters.classList.add('hidden');
 
             paginationMode = true;
             currentCategoryIndex = 0;
             container.innerHTML = '';
 
-            // Load all categories at once
             for (let i = 0; i < CATEGORIES.length; i++) {
                 const cat = CATEGORIES[i];
                 const html = renderCategorySection(cat);
@@ -621,10 +1094,20 @@
             const name = translate(rawName);
             const price = item.p || item.price;
             const img = item.i || item.image;
+            const optimizer = window.imageOptimizer;
+            const optimizedImg = (optimizer && typeof optimizer.getOptimizedUrl === 'function')
+                ? optimizer.getOptimizedUrl(img)
+                : img;
+
             return `
                 <div class="product-card bg-white dark:bg-[#1a1a1a] rounded-[45px] p-3 shadow-xl shadow-black/5 flex flex-col justify-between w-full h-full">
                     <div class="relative w-full aspect-square bg-gray-50 dark:bg-zinc-800 rounded-[38px] overflow-hidden">
-                        <img src="${img}" onerror="this.onerror=null; this.src='images/burger.png';" class="w-full h-full object-cover image-zoom">
+                        <img 
+                            data-src="${optimizedImg}" 
+                            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3C/svg%3E"
+                            alt="${name}"
+                            class="w-full h-full object-cover image-zoom lazy"
+                            onerror="this.onerror=null; this.src='images/burger.png';">
                         <button onclick="addToCartByName('${name.replace(/'/g, "\\'")}', ${price}, '${img}')" class="absolute bottom-2 right-2 w-9 h-9 price-tag rounded-full shadow-md shadow-red-500/30 flex items-center justify-center text-white active:scale-90 transition-all hover:scale-110">
                             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
                         </button>
@@ -639,9 +1122,18 @@
 
         function renderPromoCard(item) {
             const priceText = item.price ? item.price.toLocaleString() + " so'm" : '';
+            const optimizer = window.imageOptimizer;
+            const optimizedImg = (optimizer && typeof optimizer.getOptimizedUrl === 'function')
+                ? optimizer.getOptimizedUrl(item.image)
+                : item.image;
+
             return `
                 <div class="promo-card" onclick="handlePromoClick('${item.id}')">
-                    <img src="${item.image}" alt="${item.name}">
+                    <img 
+                        data-src="${optimizedImg}" 
+                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect fill='%23000' width='400' height='300'/%3E%3C/svg%3E"
+                        alt="${item.name}"
+                        class="lazy">
                     <div class="promo-card-overlay">
                         <div>
                             <span class="promo-card-badge">${item.badge}</span>
@@ -666,7 +1158,7 @@
             const promo = PROMO_ITEMS.find(item => item.id === promoId);
             if (!promo) return;
             addToCartByName(promo.label, promo.price, promo.image);
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            if (tg?.HapticFeedback) tg?.HapticFeedback.impactOccurred('light');
         };
 
         window.addToCartByName = (name, price, image) => {
@@ -674,7 +1166,7 @@
             if (inCart) inCart.quantity += 1;
             else cart.push({ name, price, image, quantity: 1, id: Date.now() });
             updateCartUI();
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            if (tg?.HapticFeedback) tg?.HapticFeedback.impactOccurred('medium');
         }
 
         let isScrollingByClick = false;
@@ -688,7 +1180,7 @@
                 window.scrollTo({ top: y, behavior: "smooth" });
             }
             setTimeout(() => { isScrollingByClick = false; }, 800);
-            if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+            if (tg?.HapticFeedback) tg?.HapticFeedback.selectionChanged();
         }
 
         function updateActiveCategoryUI(cat) {
@@ -785,14 +1277,20 @@
             const count = cart.reduce((sum, i) => sum + i.quantity, 0);
             const countEl = document.getElementById('cart-count');
             if (count > 0) {
-                countEl.innerText = count;
-                countEl.classList.remove('hidden');
-                tg.MainButton.setText(`${S.confirm_btn} (${count})`);
-                tg.MainButton.show();
-                tg.MainButton.setParams({ color: '#dc2626', text_color: '#ffffff' });
+                if (countEl) { countEl.innerText = count; countEl.classList.remove('hidden'); }
+                // safe Telegram MainButton usage
+                if (tg && tg.MainButton && typeof tg.MainButton.setText === 'function') {
+                    try {
+                        tg.MainButton.setText(`${S.confirm_btn} (${count})`);
+                        if (typeof tg.MainButton.show === 'function') tg.MainButton.show();
+                        if (typeof tg.MainButton.setParams === 'function') tg.MainButton.setParams({ color: '#dc2626', text_color: '#ffffff' });
+                    } catch (e) { console.warn('tg.MainButton error', e); }
+                }
             } else {
-                countEl.classList.add('hidden');
-                tg.MainButton.hide();
+                if (countEl) countEl.classList.add('hidden');
+                if (tg && tg.MainButton && typeof tg.MainButton.hide === 'function') {
+                    try { tg.MainButton.hide(); } catch (e) { /* ignore */ }
+                }
             }
 
             const total = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
@@ -835,8 +1333,10 @@
             }
             else {
                 container.innerHTML = cart.map(item => `
-                    <div class="flex items-center gap-5 animate-item">
-                        <div class="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-zinc-800 overflow-hidden shrink-0 shadow-md"><img src="${item.image}" class="w-full h-full object-cover"></div>
+                    <div class="flex items-center gap-5 animate-item group">
+                        <div class="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-zinc-800 overflow-hidden shrink-0 shadow-md">
+                            <img src="${item.image}" class="w-full h-full object-cover">
+                        </div>
                         <div class="grow">
                             <h4 class="font-bold text-sm leading-tight text-gray-900 dark:text-white">${item.name}</h4>
                             <p class="text-red-500 font-extrabold text-sm mt-1">${item.price.toLocaleString()} so'm</p>
@@ -850,100 +1350,268 @@
                 `).join('');
             }
 
-            const deliveryFee = total >= DELIVERY_THRESHOLD ? 0 : BASE_DELIVERY_FEE;
-            const foodTotal = total;
-            const finalTotal = foodTotal > 0 ? foodTotal + deliveryFee : 0;
-            const deliveryMessage = total >= DELIVERY_THRESHOLD ? S.delivery_free : S.delivery_fee_note;
+            // Calculate discounts
+            const quantityDiscount = applyQuantityDiscount(total, cart.reduce((sum, i) => sum + i.quantity, 0));
+            const { totalDiscount, promoResult } = calculateFinalDiscount(
+                total,
+                window.currentPromoCode || '',
+                cart.reduce((sum, i) => sum + i.quantity, 0),
+                userData.isFirstTime
+            );
+
+            // Calculate delivery fee
+            const deliveryConfig = calculateDeliveryFee(
+                total - totalDiscount,
+                window.currentDistance || null,
+                window.currentZone || 'center',
+                window.makeDeliveryOptional || false
+            );
+
+            const finalTotal = total > 0 ? (total - totalDiscount + deliveryConfig.fee) : 0;
+
+            let discountHTML = '';
+            if (quantityDiscount > 0) {
+                discountHTML += `<p class="text-[11px] text-blue-500 font-bold uppercase mb-1">📦 Quantity discount: -${quantityDiscount.toLocaleString()} so'm</p>`;
+            }
+            if (promoResult.valid) {
+                const promoDiscount = totalDiscount - quantityDiscount;
+                discountHTML += `<p class="text-[11px] text-green-500 font-bold uppercase mb-1">🎁 ${promoResult.description}: -${promoDiscount.toLocaleString()} so'm</p>`;
+            }
 
             document.getElementById('cart-total').innerHTML = `<div class="text-right">
-                <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">${S.food_label}: ${foodTotal.toLocaleString()} so'm</p>
-                <p class="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase mb-1">${S.deliv_label}: ${deliveryFee.toLocaleString()} so'm</p>
+                <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">${S.food_label}: ${total.toLocaleString()} so'm</p>
+                ${discountHTML}
+                <p class="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase mb-1">${S.deliv_label}: ${deliveryConfig.fee.toLocaleString()} so'm</p>
                 <p class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-500 mt-2">${finalTotal.toLocaleString()} so'm</p>
-                <p class="text-[10px] font-bold uppercase tracking-widest mt-2 ${total >= DELIVERY_THRESHOLD ? 'text-emerald-500' : 'text-amber-400'}">${deliveryMessage}</p>
+                <p class="text-[10px] font-bold uppercase tracking-widest mt-2 ${total >= DELIVERY_THRESHOLD ? 'text-emerald-500' : 'text-amber-400'}">${deliveryConfig.reason}</p>
             </div>`;
+        };
+
+        // ===== HELPER FUNCTIONS & LOGIC =====
+        let userData = {
+            isFirstTime: true,
+            totalOrders: 0,
+            lastOrderDate: null
+        };
+
+        function loadCartFromStorage() {
+            try {
+                const stored = localStorage.getItem('yummy_cart_v2');
+                return stored ? JSON.parse(stored) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveCartToStorage(cartData) {
+            try {
+                localStorage.setItem('yummy_cart_v2', JSON.stringify(cartData));
+            } catch (e) { }
+        }
+
+        function saveUserData(data) {
+            try {
+                localStorage.setItem('yummy_user_data', JSON.stringify(data));
+            } catch (e) { }
+        }
+
+        // Load on init
+        try {
+            const storedUser = localStorage.getItem('yummy_user_data');
+            if (storedUser) userData = JSON.parse(storedUser);
+        } catch (e) { }
+
+        function calculateDeliveryFee(subtotal, distance, zone) {
+            if (subtotal >= DELIVERY_THRESHOLD) return { fee: 0, isFree: true, reason: S.delivery_free };
+            let fee = BASE_DELIVERY_FEE;
+            if (distance && distance > 3) {
+                fee += (distance - 3) * 1000;
+            }
+            return { fee: Math.round(fee), isFree: false, reason: S.delivery_fee_note };
+        }
+
+        function addToWishlist(name, price, image) {
+            if (tg?.HapticFeedback) tg?.HapticFeedback.notificationOccurred('success');
+            alert('Added to wishlist (Favorites coming soon!)');
+        }
+
+        function filterByCategory(cat, searchTerm) {
+            // Implementation for filter chips
+            const container = document.getElementById('menu-sections');
+            paginationMode = false;
+            const filtered = FLAT_ITEMS.filter(i =>
+                (cat === 'all' || i.cat === cat) &&
+                translate(i.raw_name).toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            container.innerHTML = `<div class="px-6 grid grid-cols-2 gap-4">${filtered.map(item => renderProductCard(item)).join('')}</div>`;
         }
 
         window.changeQty = (id, delta) => {
             const idx = cart.findIndex(i => i.id === id);
+            if (idx === -1) return;
             cart[idx].quantity += delta;
             if (cart[idx].quantity <= 0) cart.splice(idx, 1);
-            renderCartItems(); updateCartUI();
+            saveCartToStorage(cart);
+            renderCartItems();
+            updateCartUI();
             if (cart.length === 0) closeCart();
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            if (tg?.HapticFeedback) tg?.HapticFeedback.impactOccurred('light');
         }
 
-        document.getElementById('cart-btn').onclick = openCart;
-        overlay.onclick = closeCart;
-        document.getElementById('clear-cart').onclick = () => { cart = []; updateCartUI(); closeCart(); };
+        function promptPromoCode() {
+            const code = prompt("Enter promo code:");
+            if (code) {
+                const total = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+                const result = validatePromoCode(code, total, userData.isFirstTime);
+                if (result.valid) {
+                    window.currentPromoCode = code;
+                    alert(result.message);
+                    renderCartItems(); // Recalculate totals
+                } else {
+                    alert(result.message);
+                }
+            }
+        }
+
+        // ===== CHECKOUT WITH LOCATION & PAYMENT =====
+        const originalCheckout = document.getElementById('checkout-btn').onclick;
         document.getElementById('checkout-btn').onclick = () => {
             const total = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-            const deliveryFee = total >= DELIVERY_THRESHOLD ? 0 : BASE_DELIVERY_FEE;
-            const finalTotal = total > 0 ? total + deliveryFee : 0;
+            const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
 
-            // Show confirmation with delivery details
-            let confirmMsg = `📋 Buyurtma tasdiqlash:\n\n`;
-            confirmMsg += `🍔 Taomlar: ${total.toLocaleString()} so'm\n`;
-            confirmMsg += `🚚 Yetkazish: ${deliveryFee.toLocaleString()} so'm\n`;
-            confirmMsg += `\n💰 Jami: ${finalTotal.toLocaleString()} so'm`;
+            const { totalDiscount } = calculateFinalDiscount(total, window.currentPromoCode || '', totalItems, userData.isFirstTime);
+            const deliveryConfig = calculateDeliveryFee(total - totalDiscount, window.currentDistance || null);
+            const finalTotal = total > 0 ? (total - totalDiscount + deliveryConfig.fee) : 0;
+
+            let confirmMsg = `📋 Buyurtma tasdiqlash:\n\n🍔 Taomlar: ${total.toLocaleString()} so'm\n`;
+            if (totalDiscount > 0) confirmMsg += `✅ Chegirma: -${totalDiscount.toLocaleString()} so'm\n`;
+            confirmMsg += `🚚 Yetkazish: ${deliveryConfig.fee.toLocaleString()} so'm\n\n💰 Jami: ${finalTotal.toLocaleString()} so'm`;
 
             if (!confirm(confirmMsg)) return;
 
             const payload = {
                 type: 'order',
                 items: cart,
+                subtotal: total,
+                discount: totalDiscount,
+                delivery_fee: deliveryConfig.fee,
                 total: finalTotal,
-                delivery_fee: deliveryFee,
-                food_total: total
+                userData: { isFirstTime: userData.isFirstTime, totalOrders: userData.totalOrders + 1 }
             };
 
             const send = () => {
-                document.getElementById('checkout-btn').disabled = true;
-                document.getElementById('checkout-btn').innerHTML = '<span>YUBORISH...</span>';
+                const checkoutBtn = document.getElementById('checkout-btn');
+                if (checkoutBtn) checkoutBtn.disabled = true;
                 setTimeout(() => {
-                    tg.sendData(JSON.stringify(payload));
-                    tg.close();
+                    // Update user data
+                    userData.isFirstTime = false;
+                    userData.totalOrders++;
+                    userData.lastOrderDate = Date.now();
+                    saveUserData(userData);
+
+                    // Clear cart
+                    cart = [];
+                    saveCartToStorage(cart);
+
+                    // Safe Telegram send/close
+                    if (tg && typeof tg.sendData === 'function') {
+                        try { tg.sendData(JSON.stringify(payload)); } catch (e) { console.warn('tg.sendData error', e); }
+                    }
+                    if (tg && typeof tg.close === 'function') {
+                        try { tg.close(); } catch (e) { console.warn('tg.close error', e); }
+                    }
                 }, 500);
             };
 
-            try {
-                const cached = localStorage.getItem('yummy_last_geo');
-                if (cached) payload.location = JSON.parse(cached);
-            } catch (e) { }
+            // Optionally get location
+            if (navigator.geolocation && !window.makeDeliveryOptional) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        payload.location = {
+                            lat: pos.coords.latitude,
+                            lon: pos.coords.longitude,
+                            accuracy: pos.coords.accuracy,
+                            ts: Date.now()
+                        };
+                        window.userLocation = payload.location;
 
-            if (!navigator.geolocation) return send();
+                        // Estimate delivery distance (simplified)
+                        if (pos.coords.accuracy < 100) {
+                            window.currentDistance = Math.round(pos.coords.accuracy / 1000 * 2) || 3;
+                            updateCartUI();
+                        }
 
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    payload.location = {
-                        lat: pos.coords.latitude,
-                        lon: pos.coords.longitude,
-                        accuracy: pos.coords.accuracy,
-                        ts: Date.now()
-                    };
-                    try {
-                        localStorage.setItem('yummy_last_geo', JSON.stringify(payload.location));
-                    } catch (e) { }
-                    send();
-                },
-                () => send(),
-                { enableHighAccuracy: true, timeout: 4000 }
-            );
+                        try {
+                            localStorage.setItem('yummy_last_geo', JSON.stringify(payload.location));
+                        } catch (e) { }
+                        send();
+                    },
+                    (err) => {
+                        console.error("Geo error:", err);
+                        send(); // Send anyway if geo fails
+                    },
+                    { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+                );
+            } else {
+                // Try to load cached location
+                try {
+                    const cached = localStorage.getItem('yummy_last_geo');
+                    if (cached) payload.location = JSON.parse(cached);
+                } catch (e) { }
+                send();
+            }
         };
 
-        tg.onEvent('mainButtonClicked', openCart);
-        document.getElementById('search-toggle').onclick = () => {
-            const box = document.getElementById('search-container');
-            box.classList.toggle('hidden');
-            if (!box.classList.contains('hidden')) document.getElementById('search-input').focus();
-        }
-        document.getElementById('search-input').oninput = (e) => renderMenu(e.target.value);
+        // ===== DARK MODE TOGGLE =====
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
+        const THEME_STORAGE_KEY = 'yummy_theme';
+        const themeIcon = document.getElementById('theme-icon');
 
-        tg.expand();
-        tg.ready();
-        if (tg.colorScheme === 'dark') {
-            document.documentElement.classList.add('dark');
-            tg.setHeaderColor('#0f0f0f');
-            tg.setBackgroundColor('#0c0c0c');
+        function initTheme() {
+            const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                htmlElement.classList.add('dark');
+                if (themeIcon) themeIcon.textContent = '☀️';
+                if (tg && typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#0f0f0f');
+                if (tg && typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#0c0c0c');
+            } else {
+                htmlElement.classList.remove('dark');
+                if (themeIcon) themeIcon.textContent = '🌙';
+                if (tg && typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#ffffff');
+                if (tg && typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#fcfcfc');
+            }
+        }
+
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                htmlElement.classList.toggle('dark');
+                const isDark = htmlElement.classList.contains('dark');
+                localStorage.setItem(THEME_STORAGE_KEY, isDark ? 'dark' : 'light');
+                if (themeIcon) themeIcon.textContent = isDark ? '☀️' : '🌙';
+
+                if (isDark) {
+                    tg.setHeaderColor('#0f0f0f');
+                    tg.setBackgroundColor('#0c0c0c');
+                } else {
+                    tg.setHeaderColor('#ffffff');
+                    tg.setBackgroundColor('#fcfcfc');
+                }
+
+                if (tg?.HapticFeedback) tg?.HapticFeedback.impactOccurred('light');
+            });
+        }
+
+        // ===== INITIALIZE =====
+        initTheme();
+        cart = loadCartFromStorage();
+        if (cart.length > 0) updateCartUI();
+
+        if (tg && typeof tg.expand === 'function') {
+            try { tg.expand(); } catch (e) { console.warn('tg.expand error', e); }
+        }
+        if (tg && typeof tg.ready === 'function') {
+            try { tg.ready(); } catch (e) { console.warn('tg.ready error', e); }
         }
 
         renderCategories();
