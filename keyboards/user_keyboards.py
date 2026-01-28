@@ -20,7 +20,7 @@ def main_menu(lang='uz', is_admin=False):
     promo_map = {p[1].upper(): {"discount": p[2], "active": bool(p[3])} for p in active_promos if p[3]}
     promo_data = base64.b64encode(json.dumps(promo_map).encode()).decode()
     
-    url = f"https://khamidovkhusnidd1n.github.io/Yummy/?lang={lang}&p={promo_data}&v=20260128_1308"
+    url = f"https://khamidovkhusnidd1n.github.io/Yummy/?lang={lang}&p={promo_data}&v=20260128_1311"
     
     kb = [
         [KeyboardButton(text=s['main_menu_btn'], web_app=WebAppInfo(url=url))],
