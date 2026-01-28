@@ -94,24 +94,19 @@ async def get_phone(message: types.Message, state: FSMContext):
 async def get_method(message: types.Message, state: FSMContext):
     lang = db.get_user_lang(message.from_user.id)
     s = STRINGS[lang]
-    user_id = message.from_user.id
     
     if message.text in [STR_UZ['method_delivery'], STR_RU['method_delivery'], STR_EN['method_delivery']]:
         await state.update_data(method='delivery')
-        
-        # Check if already have location from WebApp
         data = await state.get_data()
         if data.get('location'):
-            await state.set_state(OrderState.promo)
-            await message.answer(s['promo_req'], reply_markup=kb.promo_skip_kb(lang))
+            await show_order_summary(message, state)
         else:
             await state.set_state(OrderState.location)
             await message.answer(s['location_req'], reply_markup=kb.location_keyboard(lang))
             
     elif message.text in [STR_UZ['method_takeaway'], STR_RU['method_takeaway'], STR_EN['method_takeaway']]:
         await state.update_data(method='takeaway', location="O'zi olib ketadi", maps_url=None)
-        await state.set_state(OrderState.promo)
-        await message.answer(s['promo_req'], reply_markup=kb.promo_skip_kb(lang))
+        await show_order_summary(message, state)
     else:
         await message.answer(s['method_req'], reply_markup=kb.delivery_method_kb(lang))
 
@@ -121,7 +116,6 @@ async def get_location(message: types.Message, state: FSMContext):
     lang = db.get_user_lang(user_id)
     s = STRINGS[lang]
     
-    # Check if cart exists in DB
     items_json = db.get_cart(user_id)
     if not items_json:
         await message.answer("Savat bo'sh!")
@@ -137,44 +131,6 @@ async def get_location(message: types.Message, state: FSMContext):
         maps_url = message.text
 
     await state.update_data(location=location_str, maps_url=maps_url)
-    await state.set_state(OrderState.promo)
-    await message.answer(s['promo_req'], reply_markup=kb.promo_skip_kb(lang))
-
-@router.message(OrderState.promo)
-async def apply_promo(message: types.Message, state: FSMContext):
-    lang = db.get_user_lang(message.from_user.id)
-    s = STRINGS[lang]
-    
-    if message.text == s.get('skip_btn', 'Skip ➡️') or message.text == "O'tkazib yuborish ➡️":
-        await show_order_summary(message, state)
-        return
-
-    code = message.text.upper()
-    promo = db.get_promo_code(code)
-    
-    if promo:
-        discount = promo[2]
-        await state.update_data(promo_code=code, discount_percent=discount)
-        await message.answer(s['promo_applied'].format(percent=discount))
-    else:
-        await message.answer(s['promo_invalid'], reply_markup=kb.promo_skip_kb(lang))
-        return
-        
-    await show_order_summary(message, state)
-
-async def apply_promo_automatically(message: types.Message, state: FSMContext, code: str):
-    lang = db.get_user_lang(message.from_user.id)
-    s = STRINGS[lang]
-    code = code.upper()
-    promo = db.get_promo_code(code)
-    
-    if promo:
-        discount = promo[2]
-        await state.update_data(promo_code=code, discount_percent=discount)
-        await message.answer(s['promo_applied'].format(percent=discount))
-    else:
-        await message.answer(s['promo_invalid'])
-    
     await show_order_summary(message, state)
 
 async def show_order_summary(message: types.Message, state: FSMContext):
@@ -183,6 +139,15 @@ async def show_order_summary(message: types.Message, state: FSMContext):
     s = STRINGS[lang]
     data = await state.get_data()
     
+    # Check if promo code came from WebApp
+    promo_code = data.get('promo_code_from_app')
+    discount_percent = 0
+    if promo_code:
+        promo = db.get_promo_code(promo_code.upper())
+        if promo:
+            discount_percent = promo[2]
+            await state.update_data(promo_code=promo_code.upper(), discount_percent=discount_percent)
+
     items_json = db.get_cart(user_id)
     if not items_json:
         await message.answer("Xatolik: Savat bo'sh.")
@@ -193,7 +158,6 @@ async def show_order_summary(message: types.Message, state: FSMContext):
     subtotal = sum(i['price'] * i['quantity'] for i in items)
     items_str = "\n".join([f"- {i['name']} x {i['quantity']}" for i in items])
     
-    discount_percent = data.get('discount_percent', 0)
     discount_amount = int(subtotal * (discount_percent / 100))
     total = subtotal - discount_amount
     
