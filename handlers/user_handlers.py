@@ -230,6 +230,9 @@ async def process_confirm(message: types.Message, state: FSMContext):
         db.clear_cart(user_id)
         await state.clear()
         
+        # Force Main Menu refresh
+        await message.answer("🏠 Asosiy menyu", reply_markup=kb.main_menu(lang, is_admin))
+        
     elif message.text == s['cancel_btn']:
         await state.clear()
         await message.answer(s['order_cancelled'], reply_markup=kb.main_menu(lang))
