@@ -291,9 +291,50 @@ async def am_save_new(message: types.Message, state: FSMContext):
         return await message.answer("Iltimos, faqat raqamlardan iborat ID ni kiriting!")
     
     target_id = int(message.text)
+    
+    # Check if user exists in database (registered with bot)
+    existing_user = db.get_user(target_id)
+    
+    if not existing_user:
+        # User not registered - show warning but still allow adding
+        kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="✅ Baribir qo'shish", callback_data=f"am_force_add_{target_id}")],
+            [InlineKeyboardButton(text="❌ Bekor qilish", callback_data="am_home")]
+        ])
+        await message.answer(
+            f"⚠️ **Ogohlantirish!**\n\n"
+            f"ID `{target_id}` egasi hali botdan ro'yxatdan o'tmagan.\n\n"
+            f"Bu shaxs admin bo'lishi uchun avval botga /start buyrug'ini berishi kerak.\n\n"
+            f"Baribir qo'shmoqchimisiz?",
+            reply_markup=kb,
+            parse_mode="Markdown"
+        )
+        await state.clear()
+        return
+    
+    # User exists - add as admin
     db.add_admin(target_id, role='admin', permissions='orders')
-    await message.answer(f"✅ Admin qo'shildi (ID: {target_id}). Endi uning huquqlarini sozlashingiz mumkin.", reply_markup=akb.admin_view_kb(target_id, 'admin'))
+    user_name = existing_user[1] if existing_user else "Noma'lum"
+    await message.answer(
+        f"✅ Admin qo'shildi!\n\n"
+        f"👤 Ism: {user_name}\n"
+        f"🆔 ID: {target_id}\n\n"
+        f"Endi uning huquqlarini sozlashingiz mumkin.", 
+        reply_markup=akb.admin_view_kb(target_id, 'admin')
+    )
     await state.clear()
+
+@router.callback_query(F.data.startswith("am_force_add_"))
+async def am_force_add(callback: types.CallbackQuery):
+    """Force add admin even if not registered"""
+    target_id = int(callback.data.split("_")[3])
+    db.add_admin(target_id, role='admin', permissions='orders')
+    await callback.message.edit_text(
+        f"✅ Admin qo'shildi (ID: {target_id}).\n\n"
+        f"⚠️ Bu shaxs admin paneliga kirish uchun avval botga /start buyrug'ini berishi kerak.",
+        reply_markup=akb.admin_view_kb(target_id, 'admin')
+    )
+    await callback.answer()
 
 @router.callback_query(F.data.startswith("am_view_"))
 async def am_view(callback: types.CallbackQuery):
