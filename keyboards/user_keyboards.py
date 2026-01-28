@@ -38,9 +38,9 @@ def delivery_method_kb(lang='uz'):
     return ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
 
 def location_keyboard(lang='uz'):
-    s = STRINGS[lang]
-    kb = [[KeyboardButton(text=s['location_btn'], request_location=True)]]
-    return ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, one_time_keyboard=True)
+    # s = STRINGS[lang]
+    # kb = [[KeyboardButton(text=s['location_btn'], request_location=True)]]
+    return ReplyKeyboardRemove()
 def order_confirm_kb(lang='uz'):
     s = STRINGS[lang]
     kb = [
