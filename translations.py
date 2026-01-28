@@ -6,7 +6,6 @@
         'phone_req': "Telefon raqamingizni yuboring:",
         'phone_btn': "📞 Telefon raqamni yuborish",
         'location_req': "Iltimos, manzilingizni yozma ravishda kiriting (Masalan: Yangiyo'l, Saxrniy Havas yonida):",
-        'location_btn': "📍 Joylashuvni yuborish",
         'confirm_summary': "📊 **Buyurtmangizni tekshiring:**\n\n🍱 **Taomlar:**\n{items}\n\n📍 **Manzil:** {location}\n💰 **Jami:** {total:,} so'm\n\nHamma ma'lumotlar to'g'rimi?",
         'confirm_btn': "✅ Tasdiqlash",
         'cancel_btn': "❌ Bekor qilish",
@@ -34,10 +33,7 @@
         'delivery_fee_label': "(bepul)",
         'takeaway_label': "(bepul)",
         'confirm_summary': "📊 **Buyurtmangizni tekshiring:**\n\n🍱 **Taomlar:**\n{items}\n\n🛒 **Usul:** {method}\n📍 **Manzil:** {location}\n💰 **Jami:** {total:,} so'm\n\nHamma ma'lumotlar to'g'rimi?",
-        'promo_req': "🎟 Promo kod bormi? Bo'lsa yozing, bo'lmasa pastdagi tugmani bosing:",
-        'promo_invalid': "❌ Noto'g'ri promo kod yoki muddati o'tgan.",
-        'promo_applied': "✅ Promo kod qabul qilindi! {percent}% chegirma berildi.",
-        'skip_btn': "O'tkazib yuborish ➡️"
+        'promo_applied': "✅ Promo kod qabul qilindi! {percent}% chegirma berildi."
     },
     'ru': {
         'welcome': "Добро пожаловать, {name}!\nДобро пожаловать в Yummy bot.",
@@ -46,7 +42,6 @@
         'phone_req': "Отправьте ваш номер телефона:",
         'phone_btn': "📞 Отправить номер телефона",
         'location_req': "Пожалуйста, введите ваш адрес текстом (Например: Янгиюль, рядом с Saxrniy Havas):",
-        'location_btn': "📍 Отправить местоположение",
         'confirm_summary': "📊 **Проверьте ваш заказ:**\n\n🍱 **Блюда:**\n{items}\n\n🛒 **Способ:** {method}\n📍 **Адрес:** {location}\n💰 **Итого:** {total:,} сум\n\nВсе данные верны?",
         'confirm_btn': "✅ Подтвердить",
         'cancel_btn': "❌ Отмена",
@@ -73,10 +68,7 @@
         'method_label': "🛒 Способ:",
         'delivery_fee_label': "(бесплатно)",
         'takeaway_label': "(бесплатно)",
-        'promo_req': "🎟 Есть промокод? Если есть, введите его, если нет, нажмите кнопку ниже:",
-        'promo_invalid': "❌ Неверный промокод или истек срок действия.",
-        'promo_applied': "✅ Промокод принят! Скидка {percent}% применена.",
-        'skip_btn': "Пропустить ➡️"
+        'promo_applied': "✅ Промокод принят! Скидка {percent}% применена."
     },
     'en': {
         'welcome': "Welcome {name}!\nWelcome to Yummy bot.",
@@ -85,7 +77,6 @@
         'phone_req': "Send your phone number:",
         'phone_btn': "📞 Send phone number",
         'location_req': "Please enter your address manually (Example: Yangiyul, near Saxrniy Havas):",
-        'location_btn': "📍 Send location",
         'location_btn_menu': "📍 Location",
         'about_btn_menu': "ℹ️ About Us",
         'contact_btn_menu': "📞 Contact",
@@ -101,10 +92,7 @@
         'delivery_fee_label': "(free)",
         'takeaway_label': "(free)",
         'confirm_summary': "📊 **Check your order:**\n\n🍱 **Items:**\n{items}\n\n🛒 **Method:** {method}\n📍 **Address:** {location}\n💰 **Total:** {total:,} UZS\n\nIs everything correct?",
-        'promo_req': "🎟 Do you have a promo code? If yes, type it here, otherwise press the button below:",
-        'promo_invalid': "❌ Invalid promo code or expired.",
-        'promo_applied': "✅ Promo code accepted! {percent}% discount applied.",
-        'skip_btn': "Skip ➡️"
+        'promo_applied': "✅ Promo code accepted! {percent}% discount applied."
     }
 }
 
