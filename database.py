@@ -88,6 +88,9 @@ class Database:
                             (user_id, full_name, username, phone))
         self.conn.commit()
 
+    def get_user(self, user_id):
+        return self.cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,)).fetchone()
+
     def set_user_lang(self, user_id, lang):
         self.cursor.execute(
             "INSERT INTO users (user_id, lang) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET lang=excluded.lang",
@@ -199,6 +202,9 @@ class Database:
 
     def get_all_categories(self):
         return self.cursor.execute("SELECT * FROM categories").fetchall()
+
+    def get_category_by_name(self, name):
+        return self.cursor.execute("SELECT * FROM categories WHERE name_uz = ? OR name_ru = ? OR name_en = ?", (name, name, name)).fetchone()
 
     # --- Promo Codes ---
     def create_promo_code(self, code, discount_percent, expiry_date=None):
