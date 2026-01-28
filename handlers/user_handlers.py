@@ -220,9 +220,22 @@ async def web_app_data_handler(message: types.Message, state: FSMContext):
         items = data.get('items', [])
         db.update_cart(user_id, json.dumps(items))
         
-        await state.update_data(promo_code_from_app=data.get('promo_code'))
+        promo_code = data.get('promo_code', '').strip().upper()
+        discount_percent = 0
         
-        # New: Save address from WebApp
+        # Validate promo code from database
+        if promo_code:
+            promo = db.get_promo_code(promo_code)
+            if promo:
+                discount_percent = promo[2]  # discount percentage from DB
+        
+        await state.update_data(
+            promo_code_from_app=promo_code if promo_code else None,
+            promo_code=promo_code if promo_code else None,
+            discount_percent=discount_percent
+        )
+        
+        # Save address from WebApp
         if data.get('address'):
             await state.update_data(location=data.get('address'), maps_url=data.get('address'))
 
