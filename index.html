@@ -7,9 +7,6 @@
     <title>Yummy - Mazali Taomlar</title>
     <script src="menu_data.js?v=20260128_1311"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <<<<<<< HEAD <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
-        =======
         <script src="utils.js?v=1769524000"></script>
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
         <script>
@@ -25,7 +22,6 @@
                 } catch (e) { /* ignore */ }
             })();
         </script>
-        >>>>>>> ba91aa4 (Fix: Serve Web App from main.py, Connect to DB, Update index.html)
         <style>
             * {
                 margin: 0;
@@ -391,15 +387,6 @@
                 bottom: 0;
                 left: 0;
                 right: 0;
-                <<<<<<< HEAD height: 80px;
-                background: rgba(255, 255, 255, 0.9);
-                backdrop-filter: blur(20px);
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                border-top: 1px solid var(--border);
-                z-index: 110;
-                padding: 8px 24px 24px;
-                =======background: white;
                 black: #0f0f0f;
                 border-radius: 1.5rem;
                 max-height: 300px;
@@ -407,7 +394,6 @@
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
                 z-index: 100;
                 margin-top: 0.5rem;
-                >>>>>>>ba91aa4 (Fix: Serve Web App from main.py, Connect to DB, Update index.html)
             }
 
             .nav-btn {
@@ -869,9 +855,6 @@
             ]
         };
 
-<<<<<<< HEAD
-        let finalMenu = DEFAULT_MENU;
-=======
         const ITEM_NAMES = {
             ru: {
                 "Standart": "Стандарт", "Pishloqli": "С сыром", "Big": "Большой", "Big pishloq": "Большой с сыром",
@@ -1040,8 +1023,6 @@
                         newCats.forEach(cat => {
                             MENU_DATA[cat].forEach(item => {
                                 FLAT_ITEMS.push({ id: idCounter++, raw_name: item.n, price: item.p, image: item.i, cat });
-                            });
-                        });
                         
                         renderCategories();
                         renderMenu();
@@ -1207,7 +1188,6 @@
             const matches = [];
             Object.values(finalMenu).flat().forEach(item => {
                 if (item.n && item.n.toLowerCase().includes(val.toLowerCase())) matches.push(item);
-            });
 Select-String -Path "handlers\user_handlers.py" -Pattern "promo_req"
             if (event.key === 'Enter') checkPromo();
         }
@@ -1248,37 +1228,6 @@ Select-String -Path "handlers\user_handlers.py" -Pattern "promo_req"
 
         function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
-<<<<<<< HEAD
-        // 4. Initialization
-        function bootstrap() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const lang = urlParams.get('lang') || 'uz';
-            const p64 = urlParams.get('p');
-            if (p64) { try { window.PROMO_CODES = JSON.parse(atob(p64.replace(/-/g, '+').replace(/_/g, '/'))); } catch (e) { } }
-
-            finalMenu = (window.DYNAMIC_MENU_DATA && Object.keys(window.DYNAMIC_MENU_DATA).length > 0)
-                ? window.DYNAMIC_MENU_DATA
-                : DEFAULT_MENU;
-
-            activeCat = Object.keys(finalMenu)[0] || "";
-            setLanguage(lang);
-            renderCats();
-            renderProducts();
-            updateCartUI();
-        }
-
-        bootstrap();
-
-        // Auto Scroll Update
-        window.addEventListener('scroll', () => {
-            const sections = document.querySelectorAll('.category-block');
-            let current = '';
-            sections.forEach(s => {
-                if (window.pageYOffset >= s.offsetTop - 200) {
-                    const header = s.querySelector('.cat-name');
-                    if (header) current = header.innerText;
-                }
-=======
                 if (tg && typeof tg.setHeaderColor === 'function') {
                     try { tg.setHeaderColor(isDark ? '#0f0f0f' : '#ffffff'); } catch (e) { console.warn('tg.setHeaderColor', e); }
                 }
@@ -1289,10 +1238,6 @@ Select-String -Path "handlers\user_handlers.py" -Pattern "promo_req"
                 if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred === 'function') {
                     try { tg.HapticFeedback.impactOccurred('light'); } catch (e) { /* ignore */ }
                 }
->>>>>>> ba91aa4 (Fix: Serve Web App from main.py, Connect to DB, Update index.html)
-            });
-        if (current && activeCat !== current) { activeCat = current; renderCats(); }
-        });
     </script>
 </body>
 
