@@ -257,7 +257,7 @@ async def admin_report_msg(message: types.Message):
 async def admin_admins_msg(message: types.Message):
     if not db.has_permission(message.from_user.id, 'manage_admins'):
         return await message.answer("Sizda bu bo'limga kirish huquqi yo'q.")
-    await message.answer("👥 **Adminlar Boshqaruvi**", reply_markup=akb.admin_management_kb())
+    await message.answer("👥 Adminlar Boshqaruvi", reply_markup=akb.admin_management_kb())
 
 @router.callback_query(F.data == "am_home")
 async def am_home(callback: types.CallbackQuery):
