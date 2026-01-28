@@ -846,31 +846,38 @@
             ]
         };
 
-        // Determine which data to use
         let finalMenu = window.DYNAMIC_MENU_DATA || {};
-
         let cart = [];
-        let activeCat = Object.keys(finalMenu)[0];
+        let activeCat = Object.keys(finalMenu)[0] || "";
         let validatedPromo = null;
-        window.PROMO_CODES = {}; // Source of truth from backend
+        window.PROMO_CODES = {};
+
+        function setLanguage(lang) {
+            // Placeholder if translations needed on UI elements
+            console.log("Language set to:", lang);
+            document.documentElement.lang = lang;
+        }
 
         function initApp() {
             const urlParams = new URLSearchParams(window.location.search);
             const lang = urlParams.get('lang') || 'uz';
             const promoBase64 = urlParams.get('p');
 
-            // Sync promo codes from URL parameter (sent by backend)
             if (promoBase64) {
                 try {
                     const decoded = atob(promoBase64.replace(/-/g, '+').replace(/_/g, '/'));
                     window.PROMO_CODES = JSON.parse(decoded);
-                    console.log("Promo codes synchronized from DB:", window.PROMO_CODES);
                 } catch (e) {
                     console.error("Promo sync error:", e);
                 }
             }
 
             setLanguage(lang);
+
+            // Re-sync finalMenu just in case DYNAMIC_MENU_DATA loaded after script start
+            finalMenu = window.DYNAMIC_MENU_DATA || DEFAULT_MENU;
+            activeCat = Object.keys(finalMenu)[0];
+
             renderCats();
             renderProducts();
             updateCartUI();
