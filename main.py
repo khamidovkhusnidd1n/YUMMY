@@ -60,6 +60,28 @@ async def api_get_menu(request):
             
     return web.json_response(menu_data)
 
+async def api_validate_promo(request):
+    """API endpoint to validate promo code from database"""
+    try:
+        data = await request.json()
+        code = data.get('code', '').strip().upper()
+        
+        if not code:
+            return web.json_response({"valid": False, "message": "Kod kiritilmadi"})
+            
+        promo = db.get_promo_code(code)
+        if promo:
+            # promo table: id, code, discount_percent, is_active, expiry_date
+            return web.json_response({
+                "valid": True,
+                "discount": promo[2],
+                "message": f"Tabriklaymiz! {promo[2]}% chegirma qabul qilindi."
+            })
+        else:
+            return web.json_response({"valid": False, "message": "Promo-kod noto'g'ri yoki tugagan"})
+    except Exception as e:
+        return web.json_response({"valid": False, "message": f"Xatolik: {str(e)}"}, status=400)
+
 def main():
     if not BOT_TOKEN:
         print("Iltimos, .env fayliga BOT_TOKEN ni kiriting!")
@@ -95,13 +117,17 @@ def main():
     # 2. Setup Web App Routes
     app.router.add_get('/', web_index)
     app.router.add_get('/api/menu', api_get_menu)
+    app.router.add_post('/api/validate_promo', api_validate_promo)
     
     # 3. Setup Static Files
     # Serves the current directory for files like menu_data.js, utils.js
     # Be careful not to expose sensitive files (like .env) in production if root is served.
     # Ideally, put static assets in a 'static' folder. For now, we serve specific files or filtered root.
     app.router.add_static('/images', path='./images', name='images')
-    app.router.add_static('/', path='./', name='static') # Serve root for js files
+    # Specific files to prevent exposing .env or other source code
+    app.router.add_file('/menu_data.js', './menu_data.js')
+    app.router.add_file('/utils.js', './utils.js')
+    app.router.add_file('/simple_version_logic.js', './simple_version_logic.js')
 
     # Register startup hooks
     if WEBHOOK_URL:
