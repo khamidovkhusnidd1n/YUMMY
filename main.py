@@ -93,6 +93,16 @@ def main():
     dp.include_router(user_handlers.router)
     dp.include_router(admin_handlers.router)
 
+    # Auto-sync data from menu_data.js if database is empty
+    if not db.get_all_categories():
+        print("Database categories table is empty. Syncing from menu_data.js...")
+        try:
+            from utils.sync_from_js import import_menu_from_js
+            import_menu_from_js()
+            print("Auto-sync completed successfully.")
+        except Exception as e:
+            print(f"Auto-sync failed: {e}")
+
     # Initialize admins from config
     from config import SUPER_ADMINS, WORKERS
     for admin_id in SUPER_ADMINS:
