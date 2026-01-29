@@ -237,11 +237,6 @@ window.DYNAMIC_MENU_DATA = {
             "n": "Choy mevali",
             "p": 10000,
             "i": "images/image2/tea_via_fruits.png"
-        },
-        {
-            "n": "kofe",
-            "p": 1200,
-            "i": "images/products/product_c1136d25.jpg"
         }
     ],
     "🍹 Cocktails": [
