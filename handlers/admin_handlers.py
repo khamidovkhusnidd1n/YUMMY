@@ -72,21 +72,36 @@ def build_admin_dashboard_text(user_id):
     worker_count = total_admins - super_count
     
     admin_data = db.get_admin(user_id)
-    role_label = "Super admin" if admin_data and admin_data[1] == 'super_admin' else "Admin"
+    role_label = "🌟 Super admin" if admin_data and admin_data[1] == 'super_admin' else "🛠 Admin"
 
-    text = "*Admin Dashboard*\n"
-    text += f"Rol: {role_label}\n"
-    text += f"Adminlar: jami {total_admins} (Super: {super_count}, Worker: {worker_count})\n\n"
-    text += "Bugun:\n"
-    text += f"- Buyurtmalar: {d_orders}\n"
-    text += f"- Tushum: {d_rev:,} so'm\n\n"
-    text += "Umumiy:\n"
-    text += f"- Buyurtmalar: {t_orders}\n"
-    text += f"- Tushum: {t_rev:,} so'm\n\n"
-    text += f"Faol buyurtmalar: {active_count}\n"
-    text += "Holat bo'yicha:\n"
+    text = "🖥 **ADMIN DASHBOARD**\n"
+    text += "⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
+    text += f"👤 **Siz:** {role_label}\n"
+    text += f"👥 **Jamoa:** {total_admins} kishi (S: {super_count}, W: {worker_count})\n\n"
+    
+    text += "📅 **Bugungi natijalar:**\n"
+    text += f"🛒 Buyurtmalar: `{d_orders}` ta\n"
+    text += f"💰 Tushum: `{d_rev:,}` so'm\n\n"
+    
+    text += "📊 **Umumiy statistika:**\n"
+    text += f"🥡 Jami buyurtmalar: `{t_orders}` ta\n"
+    text += f"💵 Jami tushum: `{t_rev:,}` so'm\n\n"
+    
+    text += f"🔔 **Faol buyurtmalar: {active_count}**\n"
+    text += "⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
+    
+    status_emojis = {
+        "pending": "🟡",
+        "accepted": "🟢",
+        "preparing": "👨‍🍳",
+        "delivering": "🚴",
+        "completed": "✅",
+        "rejected": "❌"
+    }
+    
     for status, label in STATUS_LABELS:
-        text += f"- {label}: {counts.get(status, 0)}\n"
+        emoji = status_emojis.get(status, "🔹")
+        text += f"{emoji} {label}: `{counts.get(status, 0)}`\n"
 
     return text
 
@@ -115,19 +130,23 @@ async def admin_orders_callback(callback: types.CallbackQuery):
         (10,),
     ).fetchall()
 
-    text = "*Buyurtmalar monitoringi*\n\n"
-    text += f"Faol: {active_count}\n"
-    text += f"Yakunlangan: {counts.get('completed', 0)}\n"
-    text += f"Rad etilgan: {counts.get('rejected', 0)}\n\n"
-    text += "Oxirgi 10 ta buyurtma:\n"
+    text = "🛍 **BUYURTMALAR MONITORINGI**\n"
+    text += "⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
+    text += f"🔥 Faol: `{active_count}` | ✅ Yakunlangan: `{counts.get('completed', 0)}` | ❌ Rad: `{counts.get('rejected', 0)}`\n\n"
+    text += "🕒 **Oxirgi 10 ta buyurtma:**\n"
 
     if rows:
+        status_emojis = {
+            "pending": "⏳", "accepted": "✅", "preparing": "🍳",
+            "delivering": "🛵", "completed": "🏁", "rejected": "🚫"
+        }
         for order_id, total_price, status, created_at in rows:
+            emoji = status_emojis.get(status, "🔹")
             status_label = STATUS_LABEL_MAP.get(status, status)
             date_str = _format_datetime(created_at)
-            text += f"- ID {order_id} | {total_price:,} so'm | {status_label} | {date_str}\n"
+            text += f"{emoji} **#{order_id}** | `{total_price:,}` so'm | {date_str}\n"
     else:
-        text += "Hozircha buyurtma yo'q.\n"
+        text += "📭 Hozircha buyurtma yo'q.\n"
 
     await callback.message.answer(text, parse_mode="Markdown")
     await callback.answer()
@@ -165,9 +184,14 @@ async def show_stats_callback(event: types.Message | types.CallbackQuery):
     d_orders, d_rev = db.get_daily_stats()
     t_orders, t_rev = db.get_stats()
     
-    text = f"{s['stats_title']}\n\n"
-    text += f"{s['stats_today'].format(orders=d_orders, rev=d_rev)}\n\n"
-    text += f"{s['stats_total'].format(orders=t_orders, rev=t_rev)}"
+    text = f"📉 **{s['stats_title']}**\n"
+    text += "⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
+    text += f"📅 **Bugun:**\n"
+    text += f"🛒 Buyurtmalar: `{d_orders}` ta\n"
+    text += f"💰 Tushum: `{d_rev:,}` so'm\n\n"
+    text += f"🌍 **Umumiy:**\n"
+    text += f"🥡 Buyurtmalar: `{t_orders}` ta\n"
+    text += f"💵 Tushum: `{t_rev:,}` so'm"
     
     if isinstance(event, types.CallbackQuery):
         await event.message.answer(text, parse_mode="Markdown")
@@ -185,22 +209,25 @@ async def show_analytics_callback(event: types.CallbackQuery | types.Message):
     top_products = db.get_top_products()
     top_customers = db.get_top_customers()
     
-    text = "📈 **Kengaytirilgan Analitika**\n\n"
+    text = "📈 **KENGAYTIRILGAN ANALITIKA**\n"
+    text += "⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
     
-    text += "🍱 **Eng ko'p sotilgan taomlar:**\n"
+    text += "🍱 **Eng ommabop taomlar (Top 5):**\n"
     if top_products:
-        for items, count in top_products:
+        medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"]
+        for idx, (items, count) in enumerate(top_products[:5]):
+            medal = medals[idx] if idx < len(medals) else "🔹"
             clean_items = items.replace("- ", "").replace("\n", ", ")
-            text += f"- {clean_items}: {count} ta\n"
+            text += f"{medal} {clean_items}: `{count}` ta\n"
     else:
-        text += "Ma'lumot mavjud emas.\n"
+        text += "➖ Ma'lumot mavjud emas.\n"
         
-    text += "\n👑 **Top Mijozlar:**\n"
+    text += "\n👑 **Top Mijozlar (Sodiqlik):**\n"
     if top_customers:
-        for name, phone, spent in top_customers:
-            text += f"- {name} ({phone}): {spent:,} so'm\n"
+        for idx, (name, phone, spent) in enumerate(top_customers[:5]):
+            text += f"👤 {name}: `{spent:,}` so'm\n"
     else:
-        text += "Ma'lumot mavjud emas.\n"
+        text += "➖ Ma'lumot mavjud emas.\n"
         
     await message.answer(text, parse_mode="Markdown")
     if isinstance(event, types.CallbackQuery):
