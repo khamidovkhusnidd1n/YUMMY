@@ -83,7 +83,7 @@ window.DYNAMIC_MENU_DATA = {
         {
             "n": "Pishloqli Doner",
             "p": 35000,
-            "i": "images/image2/images3/donercheese.png"
+            "i": "images/image2/images3/doner_cheese.png"
         }
     ],
     "🍗 KFC": [
@@ -112,7 +112,7 @@ window.DYNAMIC_MENU_DATA = {
         {
             "n": "Mini",
             "p": 10000,
-            "i": "images/image2/images3/hot_dog.png"
+            "i": "images/hotdog.png"
         },
         {
             "n": "Twins",
@@ -144,7 +144,7 @@ window.DYNAMIC_MENU_DATA = {
         {
             "n": "Big",
             "p": 45000,
-            "i": "images/image2/images3/xaggi_big.png"
+            "i": "images/image2/images3/xagi_big.png"
         },
         {
             "n": "Xot let",
@@ -214,7 +214,7 @@ window.DYNAMIC_MENU_DATA = {
         {
             "n": "Kartoshka",
             "p": 5000,
-            "i": "images/image2/images3/kartoshkasomsa.png"
+            "i": "images/image2/images3/kartoshkalisomsa.png"
         }
     ],
     "☕️ Ichimliklar": [
