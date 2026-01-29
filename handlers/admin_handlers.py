@@ -582,17 +582,19 @@ async def admin_add_prod_image(message: types.Message, state: FSMContext):
     # Add product to database
     db.add_product(data['cat_id'], data['name'], data['price'], image_path)
     
-    # Send immediate confirmation
+    # Auto-sync to WebApp (GitHub)
+    from utils.publisher import publish_menu
+    publish_menu()
+    
+    # Send confirmation
     from keyboards.admin_keyboards import menu_manage_reply_kb
     await message.answer(
-        f"✅ Taom muvaffaqiyatli qo'shildi!\n\n📝 Nom: {data['name']}\n💰 Narx: {data['price']:,} so'm\n\n"
-        f"💡 Saytni yangilash uchun **🚀 Saytga chiqarish (Update)** tugmasini bosing.",
+        f"✅ Taom muvaffaqiyatli qo'shildi va saytga yuklandi!\n\n📝 Nom: {data['name']}\n💰 Narx: {data['price']:,} so'm\n\n"
+        f"🌐 O'zgarishlar 1-2 daqiqada ko'rinadi.",
         reply_markup=menu_manage_reply_kb()
     )
     await state.clear()
-    
-    # Background sync (optional, as the button is there for manual push)
-    # publish_menu() 
+ 
 
 # --- Cancel Handler ---
 @router.callback_query(F.data == "admin_cancel")

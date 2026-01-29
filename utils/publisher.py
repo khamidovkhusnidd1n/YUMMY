@@ -47,41 +47,28 @@ window.DYNAMIC_MENU_DATA = {json.dumps(menu_data, ensure_ascii=False, indent=4)}
 window.DYNAMIC_CATS = {json.dumps(dynamic_cats, ensure_ascii=False, indent=4)};
 """
         
-        # Write to menu_data.js
         with open('menu_data.js', 'w', encoding='utf-8') as f:
             f.write(js_content)
             
-        # Also, let's update index.html to make sure it includes menu_data.js
-        with open('index.html', 'r', encoding='utf-8') as f:
-            index_content = f.read()
-            
-        if 'src="menu_data.js"' not in index_content:
-            # Insert before the first <script> that contains Telegram WebApp
-            new_content = index_content.replace(
-                '<script src="https://telegram.org/js/telegram-web-app.js"></script>',
-                '<script src="menu_data.js?v=' + str(os.path.getmtime('yummy_bot.db')) + '"></script>\n    <script src="https://telegram.org/js/telegram-web-app.js"></script>'
-            )
-            with open('index.html', 'w', encoding='utf-8') as f:
-                f.write(new_content)
-        else:
-            # Just update the version to bust cache
-            import re
-            new_content = re.sub(r'src="menu_data\.js\?v=[^"]+"', f'src="menu_data.js?v={os.path.getmtime("yummy_bot.db")}"', index_content)
-            with open('index.html', 'w', encoding='utf-8') as f:
-                f.write(new_content)
+        # We don't need to update index.html anymore because it now has 
+        # a dynamic script tag that handles cache busting automatically.
 
         # Git push changes - safely
         try:
-            subprocess.run(["git", "add", "menu_data.js", "index.html", "images/products/*"], capture_output=True, check=False)
-            subprocess.run(["git", "commit", "-m", "Update menu from admin panel"], capture_output=True, check=False)
-            # Try to push but don't fail the whole function if it fails
-            res1 = subprocess.run(["git", "push", "origin", "HEAD:main", "--force"], capture_output=True, check=False)
-            res2 = subprocess.run(["git", "push", "origin", "HEAD:master", "--force"], capture_output=True, check=False)
+            # Add updated files
+            subprocess.run(["git", "add", "menu_data.js", "index.html"], capture_output=True, check=False)
+            # Check if there are products to add
+            if os.path.exists("images/products"):
+                subprocess.run(["git", "add", "images/products/*"], capture_output=True, check=False)
             
-            if res1.returncode != 0 and res2.returncode != 0:
-                print(f"Git push failed: {res1.stderr.decode()} {res2.stderr.decode()}")
-                # We return True because the file was updated, even if git push failed
-                # (User might be on local machine or Replit without repo access)
+            # Commit
+            subprocess.run(["git", "commit", "-m", "Update menu data [Auto-sync]"], capture_output=True, check=False)
+            
+            # Push to main
+            res = subprocess.run(["git", "push", "origin", "main", "--force"], capture_output=True, check=False)
+            
+            if res.returncode != 0:
+                print(f"Git push failed: {res.stderr.decode()}")
         except Exception as ge:
             print(f"Git operations failed: {ge}")
 
