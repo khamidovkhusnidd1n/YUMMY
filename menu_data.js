@@ -4,6 +4,10 @@ window.DYNAMIC_MENU_DATA = {
         { "n": "Kfc BURGER (+0.25 Cola)", "p": 33000, "i": "images/image2/kfc_burger.png" },
         { "n": "Kfc HAGGI (+0.25 Cola)", "p": 38000, "i": "images/image2/kfc_haggi_cola.png" }
     ],
+    "🍔 MAZZA": [
+        { "n": "MAZZA (Kichik)", "p": 15000, "i": "images/mazza.png" },
+        { "n": "MAZZA (Katta)", "p": 30000, "i": "images/mazza.png" }
+    ],
     "🌯 Lavash": [
         { "n": "Standart", "p": 30000, "i": "images/lavash.png" },
         { "n": "Pishloqli", "p": 35000, "i": "images/image2/images3/lavash_cheese.png" },
@@ -79,6 +83,7 @@ window.DYNAMIC_MENU_DATA = {
 window.DYNAMIC_CATS = {
     "uz": {
         "🔥 Specials": "🔥 Specials",
+        "🍔 MAZZA": "🍔 MAZZA",
         "🌯 Lavash": "🌯 Lavash",
         "🍔 Burger": "🍔 Burger",
         "🥙 Doner": "🥙 Doner",
@@ -96,6 +101,7 @@ window.DYNAMIC_CATS = {
     },
     "ru": {
         "🔥 Specials": "🔥 Акции",
+        "🍔 MAZZA": "🍔 MAZZA",
         "🌯 Lavash": "🌯 Лаваш",
         "🍔 Burger": "🍔 Бургер",
         "🥙 Doner": "🥙 Донер",
@@ -113,6 +119,7 @@ window.DYNAMIC_CATS = {
     },
     "en": {
         "🔥 Specials": "🔥 Specials",
+        "🍔 MAZZA": "🍔 MAZZA",
         "🌯 Lavash": "🌯 Lavash",
         "🍔 Burger": "🍔 Burger",
         "🥙 Doner": "🥙 Doner",
