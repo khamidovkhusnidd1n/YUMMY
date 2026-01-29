@@ -21,7 +21,7 @@ def main_menu(lang='uz', is_admin=False):
     promo_data = base64.b64encode(json.dumps(promo_map).encode()).decode()
     
     # URL for GitHub Pages (Fast and stable)
-    url = f"https://khamidovkhusnidd1n.github.io/bot/?lang={lang}&p={promo_data}&v={base64.b64encode(str(db.get_all_categories()).encode()).decode()[:6]}"
+    url = f"https://khamidovkhusnidd1n.github.io/YUMMY/?lang={lang}&p={promo_data}&v={base64.b64encode(str(db.get_all_categories()).encode()).decode()[:6]}"
     
     kb = [
         [KeyboardButton(text=s['main_menu_btn'], web_app=WebAppInfo(url=url))]
