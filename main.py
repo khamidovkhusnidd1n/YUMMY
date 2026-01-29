@@ -196,14 +196,14 @@ async def daily_report_scheduler(bot: Bot):
     while True:
         try:
             now = datetime.now()
-            # Calculate time until midnight (00:00)
-            target_time = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            # Calculate time until 23:50
+            target_time = now.replace(hour=23, minute=50, second=0, microsecond=0)
             if now >= target_time:
                 from datetime import timedelta
                 target_time += timedelta(days=1)
             
             wait_seconds = (target_time - now).total_seconds()
-            print(f"Daily report scheduled in {wait_seconds} seconds.")
+            print(f"Full daily report scheduled at 23:50. Waiting {wait_seconds} seconds.")
             await asyncio.sleep(wait_seconds)
             
             # Generate and send report

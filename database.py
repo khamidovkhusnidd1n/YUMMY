@@ -166,6 +166,17 @@ class Database:
             LIMIT 5
         """).fetchall()
 
+    def get_peak_hours(self):
+        """Returns top 3 peak hours for orders"""
+        return self.cursor.execute("""
+            SELECT strftime('%H:00', created_at) as hour, COUNT(*) as count 
+            FROM orders 
+            WHERE status = 'completed'
+            GROUP BY hour 
+            ORDER BY count DESC 
+            LIMIT 3
+        """).fetchall()
+
     def get_revenue_by_period(self, days=30):
         return self.cursor.execute("""
             SELECT date(created_at) as date, SUM(total_price) as revenue

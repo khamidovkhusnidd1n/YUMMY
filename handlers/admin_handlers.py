@@ -205,14 +205,14 @@ async def show_analytics_callback(event: types.CallbackQuery | types.Message):
         if isinstance(event, types.CallbackQuery):
             await event.answer("Sizda analitikani ko'rish huquqi yo'q.", show_alert=True)
         return
-    message = event if isinstance(event, types.Message) else event.message
     top_products = db.get_top_products()
     top_customers = db.get_top_customers()
+    peak_hours = db.get_peak_hours()
     
     text = "📈 **KENGAYTIRILGAN ANALITIKA**\n"
     text += "⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n"
     
-    text += "🍱 **Eng ommabop taomlar (Top 5):**\n"
+    text += "🍱 **Ommabop Taomlar (Top 5):**\n"
     if top_products:
         medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"]
         for idx, (items, count) in enumerate(top_products[:5]):
@@ -222,6 +222,13 @@ async def show_analytics_callback(event: types.CallbackQuery | types.Message):
     else:
         text += "➖ Ma'lumot mavjud emas.\n"
         
+    text += "\n🕒 **Eng gavjum vaqtlar (Peak Hours):**\n"
+    if peak_hours:
+        for hour, count in peak_hours:
+            text += f"⏰ {hour} — `{count}` ta buyurtma\n"
+    else:
+        text += "➖ Ma'lumot mavjud emas.\n"
+
     text += "\n👑 **Top Mijozlar (Sodiqlik):**\n"
     if top_customers:
         for idx, (name, phone, spent) in enumerate(top_customers[:5]):
