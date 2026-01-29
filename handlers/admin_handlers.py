@@ -142,14 +142,15 @@ async def admin_admins_callback(callback: types.CallbackQuery):
 
 @router.message(Command("fix"), F.from_user.id.in_(SUPER_ADMINS))
 async def fix_database_command(message: types.Message):
-    """Force manual sync via command"""
+    """Force manual menu database initialization"""
     msg = await message.answer("🔄 Bazani qayta tiklash boshlandi...")
     try:
-        from utils.sync_from_js import import_menu_from_js
-        import_menu_from_js()
-        await msg.edit_text("✅ Baza muvaffaqiyatli tiklandi! Endi menu bo'limini tekshirib ko'ring.")
+        # First try hardcoded initializer (most reliable)
+        from init_menu import init_menu
+        init_menu()
+        await msg.edit_text("✅ Baza muvaffaqiyatli tiklandi! 16 ta kategoriya qo'shildi.\n\nEndi menu bo'limini tekshirib ko'ring.")
     except Exception as e:
-        await msg.edit_text(f"❌ Xatolik: {e}")
+        await msg.edit_text(f"❌ Xatolik: {e}\n\nIltimos, dasturchi bilan bog'laning.")
 
 @router.message(Command("stats"))
 @router.callback_query(F.data == "admin_stats")
