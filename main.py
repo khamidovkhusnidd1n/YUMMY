@@ -140,13 +140,19 @@ def main():
     
     # 3. Setup Static Files
     # Serves the current directory for files like menu_data.js, utils.js
-    # Be careful not to expose sensitive files (like .env) in production if root is served.
-    # Ideally, put static assets in a 'static' folder. For now, we serve specific files or filtered root.
     app.router.add_static('/images', path='./images', name='images')
+    
     # Specific files to prevent exposing .env or other source code
-    app.router.add_file('/menu_data.js', './menu_data.js')
-    app.router.add_file('/utils.js', './utils.js')
-    app.router.add_file('/simple_version_logic.js', './simple_version_logic.js')
+    async def serve_menu_data(request):
+        return web.FileResponse('./menu_data.js')
+    async def serve_utils(request):
+        return web.FileResponse('./utils.js') if os.path.exists('./utils.js') else web.Response(text='')
+    async def serve_simple_logic(request):
+        return web.FileResponse('./simple_version_logic.js') if os.path.exists('./simple_version_logic.js') else web.Response(text='')
+    
+    app.router.add_get('/menu_data.js', serve_menu_data)
+    app.router.add_get('/utils.js', serve_utils)
+    app.router.add_get('/simple_version_logic.js', serve_simple_logic)
 
     # Register startup hooks
     if WEBHOOK_URL:
