@@ -460,6 +460,7 @@ async def admin_menu_manage_msg(message: types.Message):
 @router.message(F.text == "➕ Yangi taom qo'shish")
 @router.message(F.text == "✏️ Narxlarni tahrirlash")
 @router.message(F.text == "🗑 Taomni o'chirish")
+@router.message(F.text == "🚀 Saytga chiqarish (Update)")
 async def admin_menu_text_access(message: types.Message):
     if not db.has_permission(message.from_user.id, 'menu'):
         return await message.answer("Sizda bu bo'limga ruxsat yo'q.")
@@ -577,12 +578,17 @@ async def admin_add_prod_image(message: types.Message, state: FSMContext):
     # Add product to database
     db.add_product(data['cat_id'], data['name'], data['price'], image_path)
     
-    # Sync WebApp
-    from utils.publisher import publish_menu
-    publish_menu()
-
-    await message.answer(f"✅ Taom qo'shildi!\n\n📝 Nom: {data['name']}\n💰 Narx: {data['price']:,} so'm", reply_markup=admin_profile_kb(True))
+    # Send immediate confirmation
+    from keyboards.admin_keyboards import menu_manage_reply_kb
+    await message.answer(
+        f"✅ Taom muvaffaqiyatli qo'shildi!\n\n📝 Nom: {data['name']}\n💰 Narx: {data['price']:,} so'm\n\n"
+        f"💡 Saytni yangilash uchun **🚀 Saytga chiqarish (Update)** tugmasini bosing.",
+        reply_markup=menu_manage_reply_kb()
+    )
     await state.clear()
+    
+    # Background sync (optional, as the button is there for manual push)
+    # publish_menu() 
 
 # --- Cancel Handler ---
 @router.callback_query(F.data == "admin_cancel")

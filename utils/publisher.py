@@ -70,15 +70,25 @@ window.DYNAMIC_CATS = {json.dumps(dynamic_cats, ensure_ascii=False, indent=4)};
             with open('index.html', 'w', encoding='utf-8') as f:
                 f.write(new_content)
 
-        # Git push changes
-        subprocess.run(["git", "add", "menu_data.js", "index.html", "images/products/*"], capture_output=True)
-        subprocess.run(["git", "commit", "-m", "Update menu from admin panel"], capture_output=True)
-        # Push to both main and master to be safe
-        subprocess.run(["git", "push", "origin", "HEAD:main", "--force"], capture_output=True)
-        subprocess.run(["git", "push", "origin", "HEAD:master", "--force"], capture_output=True)
-        
+        # Git push changes - safely
+        try:
+            subprocess.run(["git", "add", "menu_data.js", "index.html", "images/products/*"], capture_output=True, check=False)
+            subprocess.run(["git", "commit", "-m", "Update menu from admin panel"], capture_output=True, check=False)
+            # Try to push but don't fail the whole function if it fails
+            res1 = subprocess.run(["git", "push", "origin", "HEAD:main", "--force"], capture_output=True, check=False)
+            res2 = subprocess.run(["git", "push", "origin", "HEAD:master", "--force"], capture_output=True, check=False)
+            
+            if res1.returncode != 0 and res2.returncode != 0:
+                print(f"Git push failed: {res1.stderr.decode()} {res2.stderr.decode()}")
+                # We return True because the file was updated, even if git push failed
+                # (User might be on local machine or Replit without repo access)
+        except Exception as ge:
+            print(f"Git operations failed: {ge}")
+
         return True
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         print(f"Publish error: {e}")
         return False
 
