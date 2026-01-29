@@ -122,10 +122,12 @@ def admin_management_kb():
 def admin_list_kb(admins):
     kb = []
     for admin in admins:
-        user_id, role = admin[0], admin[1]
+        # Index based access to prevent unpacking errors if table schema changes
+        user_id = admin[0]
+        role = admin[1]
         label = f"👤 {user_id} ({role})"
         kb.append([InlineKeyboardButton(text=label, callback_data=f"am_view_{user_id}")])
-    kb.append([InlineKeyboardButton(text="🔙 Orqaga", callback_data="am_home")])
+    kb.append([InlineKeyboardButton(text="🔙 Orqaga", callback_data="am_list_home" if False else "am_home")])
     return InlineKeyboardMarkup(inline_keyboard=kb)
 
 def admin_view_kb(user_id, role):
