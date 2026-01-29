@@ -122,7 +122,7 @@ def admin_management_kb():
 def admin_list_kb(admins):
     kb = []
     for admin in admins:
-        user_id, role, _, _ = admin
+        user_id, role = admin[0], admin[1]
         label = f"👤 {user_id} ({role})"
         kb.append([InlineKeyboardButton(text=label, callback_data=f"am_view_{user_id}")])
     kb.append([InlineKeyboardButton(text="🔙 Orqaga", callback_data="am_home")])
