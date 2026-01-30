@@ -938,19 +938,19 @@
 
         const ITEM_NAMES = {
             ru: {
-                "Standart": "????????", "Pishloqli": "? ?????", "Big": "???????", "Big pishloq": "??????? ? ?????",
-                "Big (45sm)": "??????? (45 ??)", "Canada (45sm)": "?????? (45 ??)", "Super (45sm)": "????? (45 ??)",
-                "Chiz": "??????", "Gamburger": "?????????", "Chizburger": "?????????", "Double": "????",
-                "Double chiz": "???? ???", "Go'shtli": "? ?????", "Pishloqli tovuq": "?????? ??????",
-                "Nuggets": "????????", "Naggets": "????????", "Nuggets mini": "???????? ????", "Naggets mini": "???????? ????",
-                "File strips": "???????", "Qanot": "????????", "Kartoshka": "???????? ???", "Lunch box": "????-????",
-                "Mini": "????", "Twins": "?????", "Sous": "????", "Yostiqchalar": "?????????", "Yostiqchalar mini": "????????? ????",
-                "Choy": "???", "Choy mevali": "????????? ???", "O'rmon mevalari": "?????? ?????", "Ko'k": "?????",
-                "Kofe": "????", "Kofe (Big)": "???? (???????)", "Moxito": "??????", "Tropic": "??????",
-                "Xot let": "??????? ?????", "Hot let": "??????? ?????", "Kfc xaggi": "KFC ?????",
-                "Kfc BURGER (+0.25 Cola)": "KFC ?????? (+0.25 ????)", "Kfc HAGGI (+0.25 Cola)": "KFC ????? (+0.25 ????)",
-                "MAZZA (Kichik)": "MAZZA (?????????)", "MAZZA (Katta)": "MAZZA (???????)",
-                "Standart Doner": "???????? ?????", "Katta Doner": "??????? ?????", "Pishloqli Doner": "?????? ?????"
+                "Standart": "Стандарт", "Pishloqli": "С сыром", "Big": "Большой", "Big pishloq": "Большой с сыром",
+                "Big (45sm)": "Большой (45 см)", "Canada (45sm)": "Канада (45 см)", "Super (45sm)": "Супер (45 см)",
+                "Chiz": "Сырный", "Gamburger": "Гамбургер", "Chizburger": "Чизбургер", "Double": "Двойной",
+                "Double chiz": "Двойной сыр", "Go'shtli": "С мясом", "Pishloqli tovuq": "Сырная курица",
+                "Nuggets": "Наггетсы", "Naggets": "Наггетсы", "Nuggets mini": "Наггетсы мини", "Naggets mini": "Наггетсы мини",
+                "File strips": "Стрипсы", "Qanot": "Крылышки", "Kartoshka": "Картошка", "Lunch box": "Ланч-бокс",
+                "Mini": "Мини", "Twins": "Твинс", "Sous": "Соус", "Yostiqchalar": "Подушечки", "Yostiqchalar mini": "Подушечки мини",
+                "Choy": "Чай", "Choy mevali": "Фруктовый чай", "O'rmon mevalari": "Лесные ягоды", "Ko'k": "Зелёный",
+                "Kofe": "Кофе", "Kofe (Big)": "Кофе (Большой)", "Moxito": "Мохито", "Tropic": "Тропик",
+                "Xot let": "Горячий латте", "Hot let": "Горячий латте", "Kfc xaggi": "KFC Хагги",
+                "Kfc BURGER (+0.25 Cola)": "KFC Бургер (+0.25 Кола)", "Kfc HAGGI (+0.25 Cola)": "KFC Хагги (+0.25 Кола)",
+                "MAZZA (Kichik)": "MAZZA (Маленький)", "MAZZA (Katta)": "MAZZA (Большой)",
+                "Standart Doner": "Стандарт Донер", "Katta Doner": "Большой Донер", "Pishloqli Doner": "Сырный Донер"
             },
             en: {
                 "Standart": "Standard", "Pishloqli": "Cheese", "Big": "Big", "Big pishloq": "Big cheese",
@@ -1058,13 +1058,13 @@
                     delivery_free: 'Yetkazib berish bepul', delivery_placeholder: 'Taom qidirish...'
                 },
                 ru: {
-                    cats: CAT_TRANS.ru || {}, search_placeholder: '????? ????...',
-                    cart_title: '???????', cart_clear: '????????', cart_empty: '??????? ?????',
-                    promo_placeholder: '???????? (???? ????)', address_label: '????? ????????:',
-                    address_placeholder: '??????? ?????, ?????, ????? ???? ? ????????...',
-                    total_label: '?????:', confirm_btn: '???????????', nav_home: '???????', nav_cart: '???????',
-                    search_close: '???????', toast_added: '????????? ? ???????!',
-                    delivery_free: '?????????? ????????', delivery_placeholder: '????? ????...'
+                    cats: CAT_TRANS.ru || {}, search_placeholder: 'Поиск блюда...',
+                    cart_title: 'Корзина', cart_clear: 'Очистить', cart_empty: 'Корзина пуста',
+                    promo_placeholder: 'Промокод (если есть)', address_label: 'Адрес доставки:',
+                    address_placeholder: 'Укажите город, улицу, номер дома и ориентир...',
+                    total_label: 'Итого:', confirm_btn: 'Подтвердить', nav_home: 'Главная', nav_cart: 'Корзина',
+                    search_close: 'Закрыть', toast_added: 'Добавлено в корзину!',
+                    delivery_free: 'Бесплатная доставка', delivery_placeholder: 'Поиск блюда...'
                 },
                 en: {
                     cats: CAT_TRANS.en || {}, search_placeholder: 'Search for food...',
@@ -1345,16 +1345,16 @@
             const localData = localPromoMap[promoCode];
             if (localData && localData.active !== false) {
                 validatedPromo = { code: promoCode, discount: localData.discount, type: 'percent' };
-                const msg = CURRENT_LANG === 'ru' ? `? ???????? ??????: ${localData.discount}% ??????!` :
-                    CURRENT_LANG === 'en' ? `? Promo code accepted: ${localData.discount}% discount!` :
-                        `? Promo-kod qabul qilindi: ${localData.discount}% chegirma!`;
+                const msg = CURRENT_LANG === 'ru' ? `✓ Промокод принят: ${localData.discount}% скидка!` :
+                    CURRENT_LANG === 'en' ? `✓ Promo code accepted: ${localData.discount}% discount!` :
+                        `✓ Promo-kod qabul qilindi: ${localData.discount}% chegirma!`;
                 messageEl.textContent = msg;
                 messageEl.className = 'success';
                 updateCartUI();
             } else {
-                const msg = CURRENT_LANG === 'ru' ? '? ???????? ????????' :
-                    CURRENT_LANG === 'en' ? '? Invalid promo code' :
-                        '? Promo-kod noto\'g\'ri';
+                const msg = CURRENT_LANG === 'ru' ? '✗ Промокод неверный' :
+                    CURRENT_LANG === 'en' ? '✗ Invalid promo code' :
+                        '✗ Promo-kod noto\'g\'ri';
                 messageEl.textContent = msg;
                 messageEl.className = 'error';
             }
