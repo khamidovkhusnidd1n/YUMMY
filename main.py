@@ -205,8 +205,8 @@ async def daily_report_scheduler(bot: Bot):
             # Get current time in Tashkent
             now_tashkent = datetime.now(tashkent_tz)
             
-            # Target is 11:20 (for testing)
-            if now_tashkent.hour == 11 and now_tashkent.minute == 20:
+            # Target is 23:40
+            if now_tashkent.hour == 23 and now_tashkent.minute == 40:
                 print(f"Time reached! Generating daily report: {now_tashkent}")
                 
                 # Generate and send report
