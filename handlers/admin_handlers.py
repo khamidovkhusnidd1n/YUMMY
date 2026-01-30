@@ -110,7 +110,7 @@ def build_admin_dashboard_text(user_id):
 async def admin_dashboard_callback(callback: types.CallbackQuery):
     user_id = callback.from_user.id
     admin = db.get_admin(user_id)
-    if not admin or (user_id not in (SUPER_ADMINS + WORKERS)):
+    if not admin:
         return await callback.answer("Sizda admin huquqi yo'q.", show_alert=True)
         
     is_super = admin[1] == 'super_admin'
@@ -305,7 +305,7 @@ async def admin_stats_msg(message: types.Message):
 async def admin_dashboard_msg(message: types.Message):
     user_id = message.from_user.id
     admin = db.get_admin(user_id)
-    if not admin or (user_id not in (SUPER_ADMINS + WORKERS)):
+    if not admin:
         return await message.answer("Sizda admin huquqi yo'q.")
     
     is_super = admin[1] == 'super_admin'
@@ -818,7 +818,7 @@ async def back_to_main_callback(callback: types.CallbackQuery):
     from keyboards.user_keyboards import main_menu
     user_id = callback.from_user.id
     lang = db.get_user_lang(user_id)
-    is_admin = (user_id in (SUPER_ADMINS + WORKERS)) and bool(db.get_admin(user_id))
+    is_admin = bool(db.get_admin(user_id))
     await callback.message.answer("🏠 Foydalanuvchi menyusiga qaytdingiz.", reply_markup=main_menu(lang, is_admin))
     await callback.answer()
 
@@ -886,7 +886,7 @@ async def reject_order(callback: types.CallbackQuery):
     s = STRINGS[lang]
 
     from keyboards.user_keyboards import main_menu
-    is_admin = (user_id in (SUPER_ADMINS + WORKERS)) and bool(db.get_admin(user_id))
+    is_admin = bool(db.get_admin(user_id))
     await callback.message.edit_text(callback.message.text + "\n\n❌ Rejected")
     await callback.bot.send_message(user_id, s['order_cancelled'], reply_markup=main_menu(lang, is_admin), parse_mode="Markdown")
     await callback.answer()
@@ -930,7 +930,7 @@ async def complete_order(callback: types.CallbackQuery):
     s = STRINGS[lang]
 
     from keyboards.user_keyboards import main_menu
-    is_admin = (user_id in (SUPER_ADMINS + WORKERS)) and bool(db.get_admin(user_id))
+    is_admin = bool(db.get_admin(user_id))
     await callback.message.edit_text(callback.message.text + "\n\n🏁 Completed")
     await callback.bot.send_message(user_id, s['sms_completed'].format(id=order_id), reply_markup=main_menu(lang, is_admin), parse_mode="Markdown")
     await callback.answer()

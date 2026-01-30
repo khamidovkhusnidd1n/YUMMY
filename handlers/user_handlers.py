@@ -39,7 +39,7 @@ async def set_language(callback: types.CallbackQuery):
     user_id = callback.from_user.id
     db.set_user_lang(user_id, lang)
     
-    is_admin = (user_id in (SUPER_ADMINS + WORKERS)) and bool(db.get_admin(user_id))
+    is_admin = bool(db.get_admin(user_id))
     s = STRINGS[lang]
     await callback.message.delete()
     await callback.message.answer(s['welcome'].format(name=callback.from_user.full_name), reply_markup=kb.main_menu(lang, is_admin), parse_mode="Markdown")
@@ -51,7 +51,7 @@ from keyboards import admin_keyboards as akb
 async def show_admin_menu(message: types.Message):
     user_id = message.from_user.id
     admin = db.get_admin(user_id)
-    if admin and (user_id in (SUPER_ADMINS + WORKERS)):
+    if admin:
         is_super = admin[1] == 'super_admin'
         await message.answer(
             "Siz hozir Admin menyusidasiz.\n\nBoshqaruv tugmalari pastda paydo bo'ldi.", 
@@ -178,7 +178,7 @@ async def process_confirm(message: types.Message, state: FSMContext):
         db.add_user(user_id, user_name, user_username, data.get('phone', 'N/A'))
 
         # Notify User & Return to Main Menu immediately
-        is_admin = (user_id in (SUPER_ADMINS + WORKERS)) and bool(db.get_admin(user_id))
+        is_admin = bool(db.get_admin(user_id))
         
         # Clear state FIRST
         await state.clear()
@@ -219,7 +219,7 @@ async def process_confirm(message: types.Message, state: FSMContext):
         
     elif message.text == s['cancel_btn']:
         await state.clear()
-        is_admin = (message.from_user.id in (SUPER_ADMINS + WORKERS)) and bool(db.get_admin(message.from_user.id))
+        is_admin = bool(db.get_admin(message.from_user.id))
         await message.answer(s['order_cancelled'], reply_markup=kb.main_menu(lang, is_admin))
 
 @router.message(F.content_type == types.ContentType.WEB_APP_DATA)
