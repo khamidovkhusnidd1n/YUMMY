@@ -876,8 +876,11 @@
                     <input type="text" id="promoInput" class="promo-cart-input" placeholder="Promo kod (agar bo'lsa)"
                         onkeyup="handlePromoKeyup(event)">
                     <button class="order-btn" id="promoCheckBtn" onclick="checkPromo()"
-                        style="flex: 0 0 auto; width: auto; height: 48px; padding: 0 20px; font-size: 14px; gap: 6px;">
-                        ?
+                        style="flex: 0 0 auto; width: 48px; height: 48px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
                     </button>
                 </div>
                 <div id="promoMessage"></div>
