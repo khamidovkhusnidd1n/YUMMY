@@ -191,41 +191,48 @@ async def daily_report_scheduler(bot: Bot):
     from config import SUPER_ADMINS
     from handlers.admin_handlers import generate_excel_report
     from aiogram import types
+    from datetime import datetime, timedelta
     import os
+    import pytz # Make sure to add this or use manual offset
+
+    # Tashkent Timezone (UTC+5)
+    tashkent_tz = pytz.timezone('Asia/Tashkent')
+    
+    print("Robust daily report scheduler initialized (Target: 23:50 Tashkent time)")
     
     while True:
         try:
-            now = datetime.now()
-            # Calculate time until 23:50
-            target_time = now.replace(hour=23, minute=50, second=0, microsecond=0)
-            if now >= target_time:
-                from datetime import timedelta
-                target_time += timedelta(days=1)
+            # Get current time in Tashkent
+            now_tashkent = datetime.now(tashkent_tz)
             
-            wait_seconds = (target_time - now).total_seconds()
-            print(f"Full daily report scheduled at 23:50. Waiting {wait_seconds} seconds.")
-            await asyncio.sleep(wait_seconds)
-            
-            # Generate and send report
-            file_path = await generate_excel_report()
-            for admin_id in SUPER_ADMINS:
-                try:
-                    await bot.send_document(
-                        admin_id, 
-                        types.FSInputFile(file_path), 
-                        caption=f"📝 Kunlik hisobot: {datetime.now().strftime('%Y-%m-%d')}"
-                    )
-                except Exception as e:
-                    print(f"Error sending daily report to {admin_id}: {e}")
-            
-            if os.path.exists(file_path):
-                os.remove(file_path)
-            
-            # Wait a bit to avoid double send in the same second
-            await asyncio.sleep(60)
+            # Target is 23:50
+            if now_tashkent.hour == 23 and now_tashkent.minute == 50:
+                print(f"Time reached! Generating daily report: {now_tashkent}")
+                
+                # Generate and send report
+                file_path = await generate_excel_report()
+                if os.path.exists(file_path):
+                    for admin_id in SUPER_ADMINS:
+                        try:
+                            await bot.send_document(
+                                admin_id, 
+                                types.FSInputFile(file_path), 
+                                caption=f"📝 Kunlik hisobot: {now_tashkent.strftime('%Y-%m-%d')}"
+                            )
+                        except Exception as e:
+                            print(f"Error sending daily report to {admin_id}: {e}")
+                    
+                    os.remove(file_path)
+                
+                # Wait 65 seconds to ensure we don't trigger again in the same minute
+                await asyncio.sleep(65)
+            else:
+                # Check every 30 seconds
+                await asyncio.sleep(30)
+                
         except Exception as e:
             print(f"Error in daily_report_scheduler: {e}")
-            await asyncio.sleep(3600) # Wait an hour before retrying if error
+            await asyncio.sleep(60) # Wait a minute before retrying if error
 
 if __name__ == "__main__":
     try:
