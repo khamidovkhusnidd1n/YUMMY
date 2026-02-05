@@ -111,7 +111,7 @@ def init_menu():
     
     conn.commit()
     conn.close()
-    print(f"✅ Menu initialized: {len(MENU_DATA)} categories added.")
+    print(f"Menu initialized: {len(MENU_DATA)} categories added.")
 
 if __name__ == "__main__":
     init_menu()
