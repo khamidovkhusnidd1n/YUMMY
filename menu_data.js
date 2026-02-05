@@ -9,7 +9,7 @@ window.DYNAMIC_MENU_DATA = {
         },
         {
             "n": "Kfc HAGGI (+0.25 Cola)",
-            "p": 37000,
+            "p": 38000,
             "i": "images/image2/kfc_haggi_cola.jpg"
         }
     ],
@@ -83,7 +83,7 @@ window.DYNAMIC_MENU_DATA = {
         {
             "n": "Pishloqli Doner",
             "p": 35000,
-            "i": "images/image2/images3/donercheese.jpg"
+            "i": "images/image2/donar.jpg"
         }
     ],
     "🍗 KFC": [
@@ -112,7 +112,7 @@ window.DYNAMIC_MENU_DATA = {
         {
             "n": "Mini",
             "p": 10000,
-            "i": "images/image2/images3/hot_dog.jpg"
+            "i": "images/image2/hot_dog.jpg"
         },
         {
             "n": "Twins",
@@ -149,7 +149,7 @@ window.DYNAMIC_MENU_DATA = {
         {
             "n": "Xot let",
             "p": 28000,
-            "i": "images/image2/xaggi.jpg"
+            "i": "images/image2/images3/xaggi.jpg"
         }
     ],
     "🍗 Naggets": [
@@ -214,7 +214,7 @@ window.DYNAMIC_MENU_DATA = {
         {
             "n": "Kartoshka",
             "p": 5000,
-            "i": "images/image2/images3/kartoshkasomsa.jpg"
+            "i": "images/image2/images3/kartoshkalisomsa.jpg"
         }
     ],
     "☕️ Ichimliklar": [
@@ -284,22 +284,22 @@ window.DYNAMIC_CATS = {
         "🥫 Souslar": "🥫 Souslar"
     },
     "ru": {
-        "🔥 Specials": "🔥 Акции",
+        "🔥 Specials": "🔥 Specials",
         "🍔 MAZZA": "🍔 MAZZA",
-        "🌯 Lavash": "🌯 Лаваш",
-        "🍔 Burger": "🍔 Бургер",
-        "🥙 Doner": "🥙 Донер",
+        "🌯 Lavash": "🌯 Lavash",
+        "🍔 Burger": "🍔 Burger",
+        "🥙 Doner": "🥙 Doner",
         "🍗 KFC": "🍗 KFC",
-        "🌭 Xot-dog": "🌭 Хот-дог",
-        "🥪 Xaggi": "🥪 Хагги",
-        "🍗 Naggets": "🍗 Наггетсы",
-        "🧀 Pishloqli yostiqchalar": "🧀 Сырные",
-        "🥪 Klab sandwich": "🥪 Клаб",
-        "🍟 Fri": "🍟 Фри",
-        "🥟 Somsa": "🥟 Сомса",
-        "☕️ Ichimliklar": "☕️ Напитки",
-        "🍹 Cocktails": "🍹 Коктейли",
-        "🥫 Souslar": "🥫 Соусы"
+        "🌭 Xot-dog": "🌭 Xot-dog",
+        "🥪 Xaggi": "🥪 Xaggi",
+        "🍗 Naggets": "🍗 Naggets",
+        "🧀 Pishloqli yostiqchalar": "🧀 Pishloqli yostiqchalar",
+        "🥪 Klab sandwich": "🥪 Klab sandwich",
+        "🍟 Fri": "🍟 Fri",
+        "🥟 Somsa": "🥟 Somsa",
+        "☕️ Ichimliklar": "☕️ Ichimliklar",
+        "🍹 Cocktails": "🍹 Cocktails",
+        "🥫 Souslar": "🥫 Souslar"
     },
     "en": {
         "🔥 Specials": "🔥 Specials",
@@ -308,15 +308,15 @@ window.DYNAMIC_CATS = {
         "🍔 Burger": "🍔 Burger",
         "🥙 Doner": "🥙 Doner",
         "🍗 KFC": "🍗 KFC",
-        "🌭 Xot-dog": "🌭 Hot-dog",
-        "🥪 Xaggi": "🥪 Haggi",
-        "🍗 Naggets": "🍗 Nuggets",
-        "🧀 Pishloqli yostiqchalar": "🧀 Cheese pods",
-        "🥪 Klab sandwich": "🥪 Club",
-        "🍟 Fri": "🍟 Fries",
+        "🌭 Xot-dog": "🌭 Xot-dog",
+        "🥪 Xaggi": "🥪 Xaggi",
+        "🍗 Naggets": "🍗 Naggets",
+        "🧀 Pishloqli yostiqchalar": "🧀 Pishloqli yostiqchalar",
+        "🥪 Klab sandwich": "🥪 Klab sandwich",
+        "🍟 Fri": "🍟 Fri",
         "🥟 Somsa": "🥟 Somsa",
-        "☕️ Ichimliklar": "☕️ Drinks",
+        "☕️ Ichimliklar": "☕️ Ichimliklar",
         "🍹 Cocktails": "🍹 Cocktails",
-        "🥫 Souslar": "🥫 Sauces"
+        "🥫 Souslar": "🥫 Souslar"
     }
 };
